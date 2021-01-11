@@ -1,0 +1,3786 @@
+{
+    "took" : 166,
+    "timed_out" : false,
+    "_shards" : {
+      "total" : 312,
+      "successful" : 312,
+      "skipped" : 0,
+      "failed" : 0
+    },
+    "hits" : {
+      "total" : {
+        "value" : 23,
+        "relation" : "eq"
+      },
+      "max_score" : 1.0,
+      "hits" : [
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "GSQ-ZnUBJjEzokoVTxhu",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "PP - SKU Mapping Alert",
+              "enabled" : true,
+              "enabled_time" : 1603972499451,
+              "schedule" : {
+                "period" : {
+                  "interval" : 15,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-marketplace-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "MKP:Failed:DataIssue:There is no EAN for SKU",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-15m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "KBRCZnUB1Z0EovIQu0f0",
+                  "name" : "SKU missing mapping",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "KRRCZnUB1Z0EovIQu0f0",
+                      "name" : "Missing SKU - EAN mapping",
+                      "destination_id" : "lYdjCHQBm5zOLdVNN4TS",
+                      "message_template" : {
+                        "source" : """
+   {{ctx.monitor.name}} just entered alert status. Please investigate the orders below
+  
+  {{#ctx.results.0.hits.hits}}
+  - *Message*: {{_source.payload.message}}
+  - *Details*: Orer ID: {{_source.payload.customData.OrderID}}, SKU: {{_source.payload.customData.sku}}, Brand: {{_source.payload.customData.Brand}}, Country: {{_source.payload.customData.Country}}
+  - *Timestamp*: {{_source.metaData.timestamp}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{_source.@timestamp}}',to:'{{_source.@timestamp}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{_source.metaData.appName}}),type:phrase,value:{{_source.metaData.appName}}),query:(match:(metaData.appName:(query:{{_source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Trigger: {{ctx.trigger.name}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Missing SKU - EAN mapping*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606293881057,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 15
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "SKU missing mapping" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "0gbtD3QB1gCBqbz_-LEr",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Price Mismatch",
+              "enabled" : true,
+              "enabled_time" : 1599200044093,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "price mismatch",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.tracePoint" : {
+                                  "query" : "END",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "24lAVHQB-7xxRqIXyUOl",
+                  "name" : "Price mismatch",
+                  "severity" : "4",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "3IlAVHQB-7xxRqIXyUOl",
+                      "name" : "Price Mismatch Alert",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - Message: *{{ctx.results.0.hits.hits.0._source.context.payload.message}}*
+  - Order numbers: {{ctx.results.0.hits.hits.0._source.context.customData.orders}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Price mismatch*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294121976,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Price mismatch" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "ySUf4HUBJjEzokoVzxOU",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Product Price  Monitor",
+              "enabled" : false,
+              "enabled_time" : null,
+              "schedule" : {
+                "period" : {
+                  "interval" : 6,
+                  "unit" : "HOURS"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.customData.monitor-name" : {
+                                  "query" : "ProductMonitor",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "products with no price details",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-6h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "96cy4HUBJOkjlStk8v58",
+                  "name" : "Product Price Details",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "-Kcy4HUBJOkjlStk8v58",
+                      "name" : "Product Price Trigger",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: {{ctx.results.0.hits.hits._source.payload.message}} --  
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  - Trigger: {{ctx.trigger.name}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Products details anomaly found*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1607071639781,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 6
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "Q6ei1nUBJOkjlStkc-lH",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "PP - Order BI Export Monitor",
+              "enabled" : true,
+              "enabled_time" : 1605623771966,
+              "schedule" : {
+                "period" : {
+                  "interval" : 15,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-marketplace-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.appName" : {
+                                  "query" : "pp-bi-orders-export",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.class" : {
+                                  "query" : "com.vfc.mkpl.bi.export.controllers.APIController",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "operator" : "OR",
+                                  "prefix_length" : 0,
+                                  "max_expansions" : 50,
+                                  "fuzzy_transpositions" : true,
+                                  "lenient" : false,
+                                  "zero_terms_query" : "NONE",
+                                  "auto_generate_synonyms_phrase_query" : true,
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-15m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "ECSj1nUBJjEzokoV1PwI",
+                  "name" : "Order BI Export Trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "ESSj1nUBJjEzokoV1PwI",
+                      "name" : "Order BI Export",
+                      "destination_id" : "lYdjCHQBm5zOLdVNN4TS",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  {{#ctx.results.0.hits.hits}}
+  - *Message*: {{_source.payload.message}}
+  - *ProfileID - ID *: {{_source.context.customData.profileId}} - {{_source.context.customData.id}}
+  - *Order Type*: {{_source.context.customData.order_type}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{_source.@timestamp}}',to:'{{_source.@timestamp}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{_source.metaData.appName}}),type:phrase,value:{{_source.metaData.appName}}),query:(match:(metaData.appName:(query:{{_source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Trigger: {{ctx.trigger.name}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Failed to export Order to BI tables*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606293916029,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 15
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Order BI Export Trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "whTlSXUB1Z0EovIQMC0r",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Orders not synched with SAP",
+              "enabled" : true,
+              "enabled_time" : 1603262558210,
+              "schedule" : {
+                "period" : {
+                  "interval" : 12,
+                  "unit" : "HOURS"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "@log_group" : {
+                                  "query" : "/ecs/vf-cm-prod-marketplace-emea-cr-orderoevent-monitor",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Orders found not processed by SAP",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-12h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "r5nmSXUBgaE_3YCbkE3z",
+                  "name" : "Trigger Orders not synched with SAP",
+                  "severity" : "5",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "sJnmSXUBgaE_3YCbkE3z",
+                      "name" : "Orders not synched with SAP",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the issue*
+  - Message: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - Recent {{ctx.results.0.hits.hits.0._source.payload.customData.label}}: {{ctx.results.0.hits.hits.0._source.payload.customData.orders}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Orders not synched with SAP*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294158621,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 12
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Trigger Orders not synched with SAP" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "YiP6P3UBJjEzokoV_c9z",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Order Event Save Payload Monitor",
+              "enabled" : true,
+              "enabled_time" : 1603096214866,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "@log_group" : {
+                                  "query" : "/aws/lambda/vf-cm-prod-marketplace-emea-cr-order-payload-to-s3-lambda",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Error while saving payload",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "ZSP8P3UBJjEzokoVNc_v",
+                  "name" : "Zalando Order Event Payload Failure",
+                  "severity" : "5",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "ZiP8P3UBJjEzokoVNc_v",
+                      "name" : "Zalando Order Event Failure",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - Recent orders: {{ctx.results.0.hits.hits.0._source.context.customData.orders}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Zalando Order Event Failure*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294294165,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Zalando Order Event Payload Failure" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "0JlLvXUBgaE_3YCbVPNR",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Error on inventory forwarder",
+              "enabled" : false,
+              "enabled_time" : null,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.appName" : {
+                                  "query" : "cr-inventory-forwarder",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "nSRMvXUBJjEzokoVKMQA",
+                  "name" : "Error on inventory forwarder ",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "niRMvXUBJjEzokoVKMQA",
+                      "name" : "Error on inventory forwarder ",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+    *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  {{#ctx.results.0.hits.hits}}
+  - File in error: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|{{_source.context.customData.file}}>
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Error on inventory forwarder*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1607014436648,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Error on inventory forwarder " : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "6yODK3UBJjEzokoVtav9",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Unfulfilled Orders",
+              "enabled" : false,
+              "enabled_time" : null,
+              "schedule" : {
+                "period" : {
+                  "interval" : 24,
+                  "unit" : "HOURS"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Found orders which have not been fulfilled",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-24h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "PJmEK3UBgaE_3YCb2SZZ",
+                  "name" : "Unfulfilled Order Trigger",
+                  "severity" : "3",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "PZmEK3UBgaE_3YCb2SZZ",
+                      "name" : "Unfulfilled Orders",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   {{ctx.monitor.name}} just entered alert status. Please investigate the orders below
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - *Recent order numbers*: {{ctx.results.0.hits.hits.0._source.payload.customData.orders}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Unfulfilled orders*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1608715891092,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 24
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : { }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "54eikHQBm5zOLdVNHs5k",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Failure to send Inventory File to Zalando",
+              "enabled" : true,
+              "enabled_time" : 1600154377819,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "failed to send inventory file to Zalando",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.tracePoint" : {
+                                  "query" : "END",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "uImkkHQB-7xxRqIXVZKR",
+                  "name" : "Zalando integration Point Trigger",
+                  "severity" : "5",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "uYmkkHQB-7xxRqIXVZKR",
+                      "name" : "Zalando Integration point failure",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+    *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - Message: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - File: {{ctx.results.0.hits.hits.0._source.context.customData.file}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.periodStart}}',to:'{{ctx.periodEnd}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:cr-order-events-monitor),type:phrase,value:cr-order-events-monitor),query:(match:(metaData.appName:(query:cr-order-events-monitor,type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery,query:'payload.class:%22{{ctx.results.0.hits.hits.0._source.payload.class}}%22'),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Failure to send Inventory File to Zalando*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294411173,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Zalando integration Point Trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "sYnvd3QB-7xxRqIXt2ao",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Order SAP Acknowledgement Monitor",
+              "enabled" : true,
+              "enabled_time" : 1601894275672,
+              "schedule" : {
+                "cron" : {
+                  "expression" : "0 8 * * *",
+                  "timezone" : "Europe/London"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "@log_group" : {
+                                  "query" : "/ecs/vf-cm-prod-marketplace-emea-cr-orderoevent-monitor",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Orders found not processed by SAP",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.tracePoint" : {
+                                  "query" : "END",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-24h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "4wfyd3QB1gCBqbz_JjC9",
+                  "name" : "Order SAP Acknowledgment Trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "5Afyd3QB1gCBqbz_JjC9",
+                      "name" : "Order SAP Acknowledgment Trigger",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - Message: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - Recent orders: {{ctx.results.0.hits.hits.0._source.payload.customData.orders}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Orders found which have not been processed by SAP*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294203050,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 8 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 24
+                  },
+                  "timezone" : "Europe/London",
+                  "daily" : 8,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "daily"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Order SAP Acknowledgment Trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "yZm-iXUBgaE_3YCb86zd",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Error on saving OrderEvent into database",
+              "enabled" : true,
+              "enabled_time" : 1604333794259,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Error while storing OrderEvent into database",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "biTBiXUBJjEzokoVglLR",
+                  "name" : "Error on saving OrderEvent into database trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "byTBiXUBJjEzokoVglLR",
+                      "name" : "Error on saving OrderEvent into database",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  {{#ctx.results.0.hits.hits}}
+  - *Order number*: {{_source.context.customData.order}}
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.periodStart}}',to:'{{ctx.periodEnd}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery,query:'payload.class:%22{{ctx.results.0.hits.hits.0._source.payload.class}}%22'),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Faled to persist the OrderEvent into database*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606820506744,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Error on saving OrderEvent into database trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "5iV-I3YBJjEzokoV7dWY",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Product Inventory Monitor",
+              "enabled" : true,
+              "enabled_time" : 1606913289619,
+              "schedule" : {
+                "period" : {
+                  "interval" : 15,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.appName" : {
+                                  "query" : "cr-inventory-csvfilemaker",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "no inventory data generated for the given stores",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-15m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "LqiBI3YBJOkjlStkaJQh",
+                  "name" : "Inventory Product Trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "L6iBI3YBJOkjlStkaJQh",
+                      "name" : "Inventory Product",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  
+  {{#ctx.results.0.hits.hits}}
+  - Message:  {{_source.payload.message}}
+   :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Zalando Inventory File not generated for Stores*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1607071697875,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 15
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Inventory Product Trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "PqagVXUBJOkjlStkZp0c",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Missing inventory file",
+              "enabled" : true,
+              "enabled_time" : 1603969501091,
+              "schedule" : {
+                "period" : {
+                  "interval" : 1,
+                  "unit" : "HOURS"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "@log_group" : {
+                                  "query" : "/ecs/vf-cm-prod-marketplace-emea-cr-orderoevent-monitor",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "query_string" : {
+                                "query" : "(S091)OR(S092)OR(S099)OR(S100)OR(S101)OR(S305)OR(S306)OR(S307)OR(S308)OR(S309)OR(S313)OR(S314)OR(S537)OR(S549)OR(S566)OR(S573)OR(S602)OR(S603)",
+                                "default_field" : "payload.customData.store-id",
+                                "fields" : [ ],
+                                "type" : "best_fields",
+                                "default_operator" : "or",
+                                "max_determinized_states" : 10000,
+                                "enable_position_increments" : true,
+                                "fuzziness" : "AUTO",
+                                "fuzzy_prefix_length" : 0,
+                                "fuzzy_max_expansions" : 50,
+                                "phrase_slop" : 0,
+                                "escape" : false,
+                                "auto_generate_synonyms_phrase_query" : true,
+                                "fuzzy_transpositions" : true,
+                                "boost" : 1.0
+                              }
+                            },
+                            {
+                              "match" : {
+                                "payload.message" : {
+                                  "query" : "Missing inventory file",
+                                  "operator" : "OR",
+                                  "prefix_length" : 0,
+                                  "max_expansions" : 50,
+                                  "fuzzy_transpositions" : true,
+                                  "lenient" : false,
+                                  "zero_terms_query" : "NONE",
+                                  "auto_generate_synonyms_phrase_query" : true,
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "S6ajVXUBJOkjlStkwp2i",
+                  "name" : "Missing inventory file trigger",
+                  "severity" : "4",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "TKajVXUBJOkjlStkwp2i",
+                      "name" : "Missing inventory file",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  
+  {{#ctx.results.0.hits.hits}}
+  - Store: {{_source.payload.customData.brand-name}} {{_source.payload.customData.store-id}} {{_source.payload.customData.store-name}}
+  - Message:  {{_source.payload.message}}
+  - Last found File:  *{{_source.payload.customData.last-file}}*
+   :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Missing inventory file*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1608551918762,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 1
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "@timestamp",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Missing inventory file trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "sZlXIXUBgaE_3YCbzBxr",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "PP - Monitor Exports to BI",
+              "enabled" : true,
+              "enabled_time" : 1602582203491,
+              "schedule" : {
+                "cron" : {
+                  "expression" : "0 12 * * *",
+                  "timezone" : "Europe/Rome"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Missing BI export",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-1d",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      },
+                      "sort" : [
+                        {
+                          "@timestamp" : {
+                            "order" : "desc"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "4yNYIXUBJjEzokoV-5VB",
+                  "name" : "Missing BI export Trigger",
+                  "severity" : "3",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "5CNYIXUBJjEzokoV-5VB",
+                      "name" : "Missing BI Export",
+                      "destination_id" : "lYdjCHQBm5zOLdVNN4TS",
+                      "message_template" : {
+                        "source" : """
+   {{ctx.monitor.name}} just entered alert status. Please investigate the issue.
+  - Message: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  {{#orders}}
+  - Recent orders (total {{ctx.results.0.hits.hits.0._source.payload.customData.totalOrders}}): {{ctx.results.0.hits.hits.0._source.payload.customData.orders}}
+  {{/orders}}
+  {{#returns}}
+  - Recent returns (total {{ctx.results.0.hits.hits.0._source.payload.customData.totalReturns}}): {{ctx.results.0.hits.hits.0._source.payload.customData.returns}}
+  {{/returns}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Missing BI Export*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606293955019,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 5
+                  },
+                  "timezone" : "Europe/Rome",
+                  "daily" : 12,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "daily"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Missing BI export Trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "lCTMiXUBJjEzokoVYFIl",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Error on retrieving SAP Order Number from broker",
+              "enabled" : true,
+              "enabled_time" : 1604334673950,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Error on retrieving sap order numbers from the broker",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "UBTNiXUB1Z0EovIQnmd_",
+                  "name" : "Error on retrieving SAP Order Number from broker trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "URTNiXUB1Z0EovIQnmd_",
+                      "name" : "Error on retrieving SAP Order Number from broker",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Error on retrieving SAP Order Number from broker*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294537403,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Error on retrieving SAP Order Number from broker trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "lxUehXYB1Z0EovIQvb0n",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "AY- Missing Goods/Stock",
+              "enabled" : true,
+              "enabled_time" : 1608551152929,
+              "schedule" : {
+                "period" : {
+                  "interval" : 24,
+                  "unit" : "HOURS"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.customData.monitor-name" : {
+                                  "query" : "GoodsAndStocksMonitor",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-24h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "0hUihXYB1Z0EovIQ-73a",
+                  "name" : "Missing AY Goods and Stock",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "0xUihXYB1Z0EovIQ-73a",
+                      "name" : "Missing AY Goods / Stock File ",
+                      "destination_id" : "OG_zNHMBpCHdhYh1bbBJ",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  
+  {{#ctx.results.0.hits.hits}}
+  - Message:  {{_source.payload.message}}
+  - Last found File:  *{{_source.payload.customData.last-file}}*
+   :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Missing AY Goods / Stock Files*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1608551968403,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 24
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "gBRPeHUB1Z0EovIQPlfC",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "PP - Zalando Invoice Processor",
+              "enabled" : true,
+              "enabled_time" : 1604041260698,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-marketplace-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "@log_group" : {
+                                  "query" : "/ecs/vf-cm-prod-marketplace-emea-zalando-orders-process",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "query_string" : {
+                                "query" : "(Error connecting to SFTP server) OR (Error saving\\/generating PDF) OR (Error while connecting to zalando to fetch zalando order number) OR (Error while generating invoice pdf) OR (Thread interrupted by another thread)",
+                                "default_field" : "payload.message",
+                                "fields" : [ ],
+                                "type" : "best_fields",
+                                "default_operator" : "or",
+                                "max_determinized_states" : 10000,
+                                "enable_position_increments" : true,
+                                "fuzziness" : "AUTO",
+                                "fuzzy_prefix_length" : 0,
+                                "fuzzy_max_expansions" : 50,
+                                "phrase_slop" : 0,
+                                "escape" : false,
+                                "auto_generate_synonyms_phrase_query" : true,
+                                "fuzzy_transpositions" : true,
+                                "boost" : 1.0
+                              }
+                            },
+                            {
+                              "query_string" : {
+                                "query" : "(ERROR) OR (WARN)",
+                                "default_field" : "metaData.priority",
+                                "fields" : [ ],
+                                "type" : "best_fields",
+                                "default_operator" : "or",
+                                "max_determinized_states" : 10000,
+                                "enable_position_increments" : true,
+                                "fuzziness" : "AUTO",
+                                "fuzzy_prefix_length" : 0,
+                                "fuzzy_max_expansions" : 50,
+                                "phrase_slop" : 0,
+                                "escape" : false,
+                                "auto_generate_synonyms_phrase_query" : true,
+                                "fuzzy_transpositions" : true,
+                                "boost" : 1.0
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "pJmTeHUBgaE_3YCbj5zs",
+                  "name" : "Zalando Invoice Creation ",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "pZmTeHUBgaE_3YCbj5zs",
+                      "name" : "Zalando Invoice Processor",
+                      "destination_id" : "lYdjCHQBm5zOLdVNN4TS",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  
+  {{#ctx.results.0.hits.hits}}
+  - *Message*: {{_source.payload.message}}
+  - *Order details*: [OcmAccountId: {{_source.payload.customData.ocmAccountId}} Brand: {{_source.payload.customData.Brand}}, Order ID: {{_source.payload.customData.orderId}}, Country: {{_source.payload.customData.Country}}]
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{_source.@timestamp}}',to:'{{_source.@timestamp}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{_source.metaData.appName}}),type:phrase,value:{{_source.metaData.appName}}),query:(match:(metaData.appName:(query:{{_source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Trigger: {{ctx.trigger.name}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Zalando Invoice Processor Issue*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606293845995,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Zalando Invoice Creation " : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "2pjp_XQBgaE_3YCb6f1j",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "PP - ADSR creation failure",
+              "enabled" : true,
+              "enabled_time" : 1601987799386,
+              "schedule" : {
+                "cron" : {
+                  "expression" : "0 7 * * *",
+                  "timezone" : "UTC"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-marketplace-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "@log_group" : {
+                                  "query" : "/ecs/vf-cm-prod-marketplace-emea-process-new-order",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "query_string" : {
+                                "query" : "(Failed to generate ADSR file) OR (Error while fetching shipped orders from DB with ocmAcctId exception) OR (Error while fetching line item return orders from DB)",
+                                "default_field" : "payload.message",
+                                "fields" : [ ],
+                                "type" : "best_fields",
+                                "default_operator" : "or",
+                                "max_determinized_states" : 10000,
+                                "enable_position_increments" : true,
+                                "fuzziness" : "AUTO",
+                                "fuzzy_prefix_length" : 0,
+                                "fuzzy_max_expansions" : 50,
+                                "phrase_slop" : 0,
+                                "escape" : false,
+                                "auto_generate_synonyms_phrase_query" : true,
+                                "fuzzy_transpositions" : true,
+                                "boost" : 1.0
+                              }
+                            },
+                            {
+                              "match" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "operator" : "OR",
+                                  "prefix_length" : 0,
+                                  "max_expansions" : 50,
+                                  "fuzzy_transpositions" : true,
+                                  "lenient" : false,
+                                  "zero_terms_query" : "NONE",
+                                  "auto_generate_synonyms_phrase_query" : true,
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-12h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "25jq_XQBgaE_3YCbj_3M",
+                  "name" : "ADSR Trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "3Jjq_XQBgaE_3YCbj_3M",
+                      "name" : "Failed to create new ADSR",
+                      "destination_id" : "lYdjCHQBm5zOLdVNN4TS",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  {{#ctx.results.0.hits.hits}}
+  - *Message*: {{_source.payload.message}}
+  - *Order details*: [*Brand*: {{_source.payload.customData.brand}}, *OCM Account ID*: {{_source.payload.customData.ocmAcctId}}, *Country*: {{_source.payload.customData.Country}}]
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{_source.@timestamp}}',to:'{{_source.@timestamp}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{_source.metaData.appName}}),type:phrase,value:{{_source.metaData.appName}}),query:(match:(metaData.appName:(query:{{_source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Trigger: {{ctx.trigger.name}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Failed to create new ADSR*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606293992886,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 7 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 15
+                  },
+                  "timezone" : "UTC",
+                  "daily" : 7,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "daily"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "ADSR Trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "rpp7_nUBgaE_3YCbfZOb",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - SAP Order Number Saver Monitor",
+              "enabled" : true,
+              "enabled_time" : 1606292307347,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.appName" : {
+                                  "query" : "cr-sapordernumber-saver",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "operator" : "OR",
+                                  "prefix_length" : 0,
+                                  "max_expansions" : 50,
+                                  "fuzzy_transpositions" : true,
+                                  "lenient" : false,
+                                  "zero_terms_query" : "NONE",
+                                  "auto_generate_synonyms_phrase_query" : true,
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "5ZqM_nUBgaE_3YCb8ZNX",
+                  "name" : "SAP Order Number Trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "5pqM_nUBgaE_3YCb8ZNX",
+                      "name" : "SAP Order Number Trigger",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+    *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  
+  {{#ctx.results.0.hits.hits}}
+  - Message:  {{_source.payload.message}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *SAP Order Acknowledgment processing failure*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606293691203,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "k4kEfHQB-7xxRqIXLW67",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - File moved to failed folder",
+              "enabled" : true,
+              "enabled_time" : 1600239945791,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "file moved to the failed directory inventory-sources-failed",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "cYUHfHQBnr12y3m8Zwrk",
+                  "name" : "Inventory file moved to failed folder",
+                  "severity" : "4",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "coUHfHQBnr12y3m8Zwrk",
+                      "name" : "Inventory file moved fo failed folder",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - Message: *{{ctx.results.0.hits.hits.0._source.context.customData.file}} {{ctx.results.0.hits.hits.0._source.payload.message}}*
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Inventory file moved to failed folder*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294355290,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "YhTaiXUB1Z0EovIQoGck",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Error on uploading inventory file",
+              "enabled" : true,
+              "enabled_time" : 1604335607834,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.tracePoint" : {
+                                  "query" : "END",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.appName" : {
+                                  "query" : "cr-inventory-files-uploader",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "A6fciXUBJOkjlStkqx7P",
+                  "name" : "Error on uploading inventory file trigger",
+                  "severity" : "4",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "BKfciXUBJOkjlStkqx7P",
+                      "name" : "Error on uploading inventory file",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  {{#ctx.results.0.hits.hits}}
+  - *Vf order id*: {{_source.context.customData.file-name}}
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Error in uploading inventory file*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294447337,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Error on uploading inventory file trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "GySniXUBJjEzokoVZFIw",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "CR - Error on forwarding OE to MW",
+              "enabled" : true,
+              "enabled_time" : 1604332250150,
+              "schedule" : {
+                "period" : {
+                  "interval" : 30,
+                  "unit" : "MINUTES"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "match_phrase" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "payload.message" : {
+                                  "query" : "Error while forwarding OE.vf_order_id",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-30m",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "GRStiXUB1Z0EovIQqmdA",
+                  "name" : "Error on forwarding OE to MW trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "GhStiXUB1Z0EovIQqmdA",
+                      "name" : "Error on forwarding OE to MW",
+                      "destination_id" : "UYRiCHQBnr12y3m86JZT",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  - *Message*: *{{ctx.results.0.hits.hits.0._source.payload.message}}*
+  {{#ctx.results.0.hits.hits}}
+  - *Vf order id*: {{_source.context.customData.vf_order_id}}
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Faled to send OrderEvent to MW/SAP*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1606294827190,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "MINUTES",
+                    "interval" : 30
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                },
+                "triggers" : {
+                  "Error on forwarding OE to MW trigger" : {
+                    "value" : 10000,
+                    "enum" : "ABOVE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_index" : ".opendistro-alerting-config",
+          "_type" : "_doc",
+          "_id" : "zKkEhXYBJOkjlStki2Ss",
+          "_score" : 1.0,
+          "_source" : {
+            "monitor" : {
+              "type" : "monitor",
+              "schema_version" : 1,
+              "name" : "AY - stock and goods monitor",
+              "enabled" : true,
+              "enabled_time" : 1608549436328,
+              "schedule" : {
+                "period" : {
+                  "interval" : 4,
+                  "unit" : "HOURS"
+                }
+              },
+              "inputs" : [
+                {
+                  "search" : {
+                    "indices" : [
+                      "cwl-cr-emea-prod*"
+                    ],
+                    "query" : {
+                      "query" : {
+                        "bool" : {
+                          "must" : [
+                            {
+                              "query_string" : {
+                                "query" : "(ay-stock-movement-processor) OR (ay-goods-movement-processor)",
+                                "default_field" : "metaData.appName",
+                                "fields" : [ ],
+                                "type" : "best_fields",
+                                "default_operator" : "or",
+                                "max_determinized_states" : 10000,
+                                "enable_position_increments" : true,
+                                "fuzziness" : "AUTO",
+                                "fuzzy_prefix_length" : 0,
+                                "fuzzy_max_expansions" : 50,
+                                "phrase_slop" : 0,
+                                "escape" : false,
+                                "auto_generate_synonyms_phrase_query" : true,
+                                "fuzzy_transpositions" : true,
+                                "boost" : 1.0
+                              }
+                            },
+                            {
+                              "match_phrase" : {
+                                "metaData.priority" : {
+                                  "query" : "ERROR",
+                                  "slop" : 0,
+                                  "zero_terms_query" : "NONE",
+                                  "boost" : 1.0
+                                }
+                              }
+                            },
+                            {
+                              "range" : {
+                                "@timestamp" : {
+                                  "from" : "now-4h",
+                                  "to" : "now",
+                                  "include_lower" : true,
+                                  "include_upper" : true,
+                                  "format" : "strict_date_optional_time",
+                                  "boost" : 1.0
+                                }
+                              }
+                            }
+                          ],
+                          "adjust_pure_negative" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "triggers" : [
+                {
+                  "id" : "0akHhXYBJOkjlStkAmSF",
+                  "name" : "AY stock and Movement trigger",
+                  "severity" : "1",
+                  "condition" : {
+                    "script" : {
+                      "source" : "ctx.results[0].hits.total.value > 0",
+                      "lang" : "painless"
+                    }
+                  },
+                  "actions" : [
+                    {
+                      "id" : "0qkHhXYBJOkjlStkAmSF",
+                      "name" : "AY Stock and Goods",
+                      "destination_id" : "OG_zNHMBpCHdhYh1bbBJ",
+                      "message_template" : {
+                        "source" : """
+   *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*
+  
+  {{#ctx.results.0.hits.hits}}
+  - Message:  {{_source.payload.message}}
+  
+   :eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))&_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  {{/ctx.results.0.hits.hits}}
+  - Severity: {{ctx.trigger.severity}}
+  - Period start: {{ctx.periodStart}}
+  - Period end: {{ctx.periodEnd}}
+  
+  """,
+                        "lang" : "mustache"
+                      },
+                      "throttle_enabled" : false,
+                      "subject_template" : {
+                        "source" : ":sos: *Failed to process Goods / Stock AY file*",
+                        "lang" : "mustache"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "last_update_time" : 1608623174413,
+              "ui_metadata" : {
+                "schedule" : {
+                  "cronExpression" : "0 */1 * * *",
+                  "period" : {
+                    "unit" : "HOURS",
+                    "interval" : 4
+                  },
+                  "timezone" : null,
+                  "daily" : 0,
+                  "monthly" : {
+                    "type" : "day",
+                    "day" : 1
+                  },
+                  "weekly" : {
+                    "tue" : false,
+                    "wed" : false,
+                    "thur" : false,
+                    "sat" : false,
+                    "fri" : false,
+                    "mon" : false,
+                    "sun" : false
+                  },
+                  "frequency" : "interval"
+                },
+                "search" : {
+                  "aggregationType" : "count",
+                  "fieldName" : "",
+                  "overDocuments" : "all documents",
+                  "searchType" : "query",
+                  "bucketValue" : 1,
+                  "timeField" : "",
+                  "groupedOverTop" : 5,
+                  "bucketUnitOfTime" : "h",
+                  "where" : {
+                    "fieldName" : [ ],
+                    "fieldRangeEnd" : 0,
+                    "fieldRangeStart" : 0,
+                    "fieldValue" : "",
+                    "operator" : "is"
+                  },
+                  "groupedOverFieldName" : "bytes"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+  

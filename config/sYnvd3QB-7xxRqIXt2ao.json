@@ -1,0 +1,161 @@
+{
+	"_id": "sYnvd3QB-7xxRqIXt2ao",
+	"_index": ".opendistro-alerting-config",
+	"_score": 1,
+	"_source": {
+		"monitor": {
+			"enabled": true,
+			"enabled_time": 1601894275672,
+			"inputs": [
+				{
+					"search": {
+						"indices": [
+							"cwl-cr-emea-prod*"
+						],
+						"query": {
+							"query": {
+								"bool": {
+									"adjust_pure_negative": true,
+									"boost": 1,
+									"must": [
+										{
+											"match_phrase": {
+												"@log_group": {
+													"boost": 1,
+													"query": "/ecs/vf-cm-prod-marketplace-emea-cr-orderoevent-monitor",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"match_phrase": {
+												"payload.message": {
+													"boost": 1,
+													"query": "Orders found not processed by SAP",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"match_phrase": {
+												"metaData.tracePoint": {
+													"boost": 1,
+													"query": "END",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"range": {
+												"@timestamp": {
+													"boost": 1,
+													"format": "strict_date_optional_time",
+													"from": "now-24h",
+													"include_lower": true,
+													"include_upper": true,
+													"to": "now"
+												}
+											}
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			],
+			"last_update_time": 1606294203050,
+			"name": "CR - Order SAP Acknowledgement Monitor",
+			"schedule": {
+				"cron": {
+					"expression": "0 8 * * *",
+					"timezone": "Europe/London"
+				}
+			},
+			"schema_version": 1,
+			"triggers": [
+				{
+					"actions": [
+						{
+							"destination_id": "UYRiCHQBnr12y3m86JZT",
+							"id": "5Afyd3QB1gCBqbz_JjC9",
+							"message_template": {
+								"lang": "mustache",
+								"source": " *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*\n- Message: *{{ctx.results.0.hits.hits.0._source.payload.message}}*\n- Recent orders: {{ctx.results.0.hits.hits.0._source.payload.customData.orders}}\n- Severity: {{ctx.trigger.severity}}\n- Period start: {{ctx.periodStart}}\n- Period end: {{ctx.periodEnd}}\n:eyes: \u003chttps://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))\u0026_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details\u003e"
+							},
+							"name": "Order SAP Acknowledgment Trigger",
+							"subject_template": {
+								"lang": "mustache",
+								"source": ":sos: *Orders found which have not been processed by SAP*"
+							},
+							"throttle_enabled": false
+						}
+					],
+					"condition": {
+						"script": {
+							"lang": "painless",
+							"source": "ctx.results[0].hits.total.value \u003e 0"
+						}
+					},
+					"id": "4wfyd3QB1gCBqbz_JjC9",
+					"name": "Order SAP Acknowledgment Trigger",
+					"severity": "1"
+				}
+			],
+			"type": "monitor",
+			"ui_metadata": {
+				"schedule": {
+					"cronExpression": "0 8 * * *",
+					"daily": 8,
+					"frequency": "daily",
+					"monthly": {
+						"day": 1,
+						"type": "day"
+					},
+					"period": {
+						"interval": 24,
+						"unit": "HOURS"
+					},
+					"timezone": "Europe/London",
+					"weekly": {
+						"fri": false,
+						"mon": false,
+						"sat": false,
+						"sun": false,
+						"thur": false,
+						"tue": false,
+						"wed": false
+					}
+				},
+				"search": {
+					"aggregationType": "count",
+					"bucketUnitOfTime": "h",
+					"bucketValue": 1,
+					"fieldName": "",
+					"groupedOverFieldName": "bytes",
+					"groupedOverTop": 5,
+					"overDocuments": "all documents",
+					"searchType": "query",
+					"timeField": "",
+					"where": {
+						"fieldName": [],
+						"fieldRangeEnd": 0,
+						"fieldRangeStart": 0,
+						"fieldValue": "",
+						"operator": "is"
+					}
+				},
+				"triggers": {
+					"Order SAP Acknowledgment Trigger": {
+						"enum": "ABOVE",
+						"value": 10000
+					}
+				}
+			}
+		}
+	},
+	"_type": "_doc"
+}

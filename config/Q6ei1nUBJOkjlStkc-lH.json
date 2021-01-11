@@ -1,0 +1,160 @@
+{
+	"_id": "Q6ei1nUBJOkjlStkc-lH",
+	"_index": ".opendistro-alerting-config",
+	"_score": 1,
+	"_source": {
+		"monitor": {
+			"enabled": true,
+			"enabled_time": 1605623771966,
+			"inputs": [
+				{
+					"search": {
+						"indices": [
+							"cwl-marketplace-emea-prod*"
+						],
+						"query": {
+							"query": {
+								"bool": {
+									"adjust_pure_negative": true,
+									"boost": 1,
+									"must": [
+										{
+											"match_phrase": {
+												"metaData.appName": {
+													"boost": 1,
+													"query": "pp-bi-orders-export",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"match_phrase": {
+												"payload.class": {
+													"boost": 1,
+													"query": "com.vfc.mkpl.bi.export.controllers.APIController",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"match": {
+												"metaData.priority": {
+													"auto_generate_synonyms_phrase_query": true,
+													"boost": 1,
+													"fuzzy_transpositions": true,
+													"lenient": false,
+													"max_expansions": 50,
+													"operator": "OR",
+													"prefix_length": 0,
+													"query": "ERROR",
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"range": {
+												"@timestamp": {
+													"boost": 1,
+													"format": "strict_date_optional_time",
+													"from": "now-15m",
+													"include_lower": true,
+													"include_upper": true,
+													"to": "now"
+												}
+											}
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			],
+			"last_update_time": 1609766098361,
+			"name": "PP - Order BI Export Monitor",
+			"schedule": {
+				"period": {
+					"interval": 20,
+					"unit": "MINUTES"
+				}
+			},
+			"schema_version": 1,
+			"triggers": [
+				{
+					"actions": [
+						{
+							"destination_id": "lYdjCHQBm5zOLdVNN4TS",
+							"id": "ESSj1nUBJjEzokoV1PwI",
+							"message_template": {
+								"lang": "mustache",
+								"source": " *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*\n{{#ctx.results.0.hits.hits}}\n- *Message*: {{_source.payload.message}}\n- *ProfileID - ID *: {{_source.context.customData.profileId}} - {{_source.context.customData.id}}\n- *Order Type*: {{_source.context.customData.order_type}}\n:eyes: \u003chttps://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{_source.@timestamp}}',to:'{{_source.@timestamp}}'))\u0026_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{_source.metaData.appName}}),type:phrase,value:{{_source.metaData.appName}}),query:(match:(metaData.appName:(query:{{_source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details\u003e\n----------------------------------------------------------------------------------------------------------------------------------------------------------------\n{{/ctx.results.0.hits.hits}}\n- Trigger: {{ctx.trigger.name}}\n- Severity: {{ctx.trigger.severity}}\n- Period start: {{ctx.periodStart}}\n- Period end: {{ctx.periodEnd}}\n"
+							},
+							"name": "Order BI Export",
+							"subject_template": {
+								"lang": "mustache",
+								"source": ":sos: *Failed to export Order to BI tables*"
+							},
+							"throttle_enabled": false
+						}
+					],
+					"condition": {
+						"script": {
+							"lang": "painless",
+							"source": "ctx.results[0].hits.total.value \u003e 0"
+						}
+					},
+					"id": "ECSj1nUBJjEzokoV1PwI",
+					"name": "Order BI Export Trigger",
+					"severity": "1"
+				}
+			],
+			"type": "monitor",
+			"ui_metadata": {
+				"schedule": {
+					"cronExpression": "0 */1 * * *",
+					"daily": 0,
+					"frequency": "interval",
+					"monthly": {
+						"day": 1,
+						"type": "day"
+					},
+					"period": {
+						"interval": 20,
+						"unit": "MINUTES"
+					},
+					"timezone": null,
+					"weekly": {
+						"fri": false,
+						"mon": false,
+						"sat": false,
+						"sun": false,
+						"thur": false,
+						"tue": false,
+						"wed": false
+					}
+				},
+				"search": {
+					"aggregationType": "count",
+					"bucketUnitOfTime": "h",
+					"bucketValue": 1,
+					"fieldName": "",
+					"groupedOverFieldName": "bytes",
+					"groupedOverTop": 5,
+					"overDocuments": "all documents",
+					"searchType": "query",
+					"timeField": "",
+					"where": {
+						"fieldName": [],
+						"fieldRangeEnd": 0,
+						"fieldRangeStart": 0,
+						"fieldValue": "",
+						"operator": "is"
+					}
+				}
+			}
+		}
+	},
+	"_type": "_doc"
+}

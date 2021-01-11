@@ -1,0 +1,12 @@
+{
+    "size": 10000,
+    "query": {
+        "bool": {
+            "must": {
+                "exists": {
+                    "field": "monitor"
+                }
+            }
+        }
+    }
+}

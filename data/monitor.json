@@ -1,0 +1,134 @@
+{"monitor" : {
+    "type" : "monitor",
+    "schema_version" : 1,
+    "name" : "PP - SKU Mapping Alert",
+    "enabled" : true,
+    "enabled_time" : 1603972499451,
+    "schedule" : {
+      "period" : {
+        "interval" : 15,
+        "unit" : "MINUTES"
+      }
+    },
+    "inputs" : [
+      {
+        "search" : {
+          "indices" : [
+            "cwl-marketplace-emea-prod*"
+          ],
+          "query" : {
+            "query" : {
+              "bool" : {
+                "must" : [
+                  {
+                    "match_phrase" : {
+                      "payload.message" : {
+                        "query" : "MKP:Failed:DataIssue:There is no EAN for SKU",
+                        "slop" : 0,
+                        "zero_terms_query" : "NONE",
+                        "boost" : 1.0
+                      }
+                    }
+                  },
+                  {
+                    "range" : {
+                      "@timestamp" : {
+                        "from" : "now-15m",
+                        "to" : "now",
+                        "include_lower" : true,
+                        "include_upper" : true,
+                        "format" : "strict_date_optional_time",
+                        "boost" : 1.0
+                      }
+                    }
+                  }
+                ],
+                "adjust_pure_negative" : true,
+                "boost" : 1.0
+              }
+            }
+          }
+        }
+      }
+    ],
+    "triggers" : [
+      {
+        "id" : "KBRCZnUB1Z0EovIQu0f0",
+        "name" : "SKU missing mapping",
+        "severity" : "1",
+        "condition" : {
+          "script" : {
+            "source" : "ctx.results[0].hits.total.value > 0",
+            "lang" : "painless"
+          }
+        },
+        "actions" : [
+          {
+            "id" : "KRRCZnUB1Z0EovIQu0f0",
+            "name" : "Missing SKU - EAN mapping",
+            "destination_id" : "lYdjCHQBm5zOLdVNN4TS",
+            "message_template" : {
+              "source" : "{{ctx.monitor.name}} just entered alert status updated.\n Please investigate the orders below {{#ctx.results.0.hits.hits}}\n- *Message*: {{_source.payload.message}}\n- *Details*: Orer ID: {{_source.payload.customData.OrderID}}, SKU: {{_source.payload.customData.sku}}, Brand: {{_source.payload.customData.Brand}}, Country: {{_source.payload.customData.Country}}\n- *Timestamp*: {{_source.metaData.timestamp}}\n:eyes: <https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{_source.@timestamp}}',to:'{{_source.@timestamp}}'))&_a=(columns:!(context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{_source.metaData.appName}}),type:phrase,value:{{_source.metaData.appName}}),query:(match:(metaData.appName:(query:{{_source.metaData.appName}},type:phrase))))),index:'a8c2b5f0-b48e-11ea-83d4-bb6662d711ea',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details>\n{{/ctx.results.0.hits.hits}}\n- Trigger: {{ctx.trigger.name}}\n- Severity: {{ctx.trigger.severity}}\n- Period start: {{ctx.periodStart}}\n- Period end: {{ctx.periodEnd}}",
+              "lang" : "mustache"
+            },
+            "throttle_enabled" : false,
+            "subject_template" : {
+              "source" : ":sos: *Missing SKU - EAN mapping*",
+              "lang" : "mustache"
+            }
+          }
+        ]
+      }
+    ],
+    "last_update_time" : 1606293881057,
+    "ui_metadata" : {
+      "schedule" : {
+        "cronExpression" : "0 */1 * * *",
+        "period" : {
+          "unit" : "MINUTES",
+          "interval" : 15
+        },
+        "timezone" : null,
+        "daily" : 0,
+        "monthly" : {
+          "type" : "day",
+          "day" : 1
+        },
+        "weekly" : {
+          "tue" : false,
+          "wed" : false,
+          "thur" : false,
+          "sat" : false,
+          "fri" : false,
+          "mon" : false,
+          "sun" : false
+        },
+        "frequency" : "interval"
+      },
+      "search" : {
+        "aggregationType" : "count",
+        "fieldName" : "",
+        "overDocuments" : "all documents",
+        "searchType" : "query",
+        "bucketValue" : 1,
+        "timeField" : "",
+        "groupedOverTop" : 5,
+        "bucketUnitOfTime" : "h",
+        "where" : {
+          "fieldName" : [ ],
+          "fieldRangeEnd" : 0,
+          "fieldRangeStart" : 0,
+          "fieldValue" : "",
+          "operator" : "is"
+        },
+        "groupedOverFieldName" : "bytes"
+      },
+      "triggers" : {
+        "SKU missing mapping" : {
+          "value" : 10000,
+          "enum" : "ABOVE"
+        }
+      }
+    }
+  }
+}
