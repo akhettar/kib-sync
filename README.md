@@ -1,9 +1,12 @@
 mkp-kibana-monitors
 
 # Overview
-This is a command line tool to sync and update the `Kibana monitor configs` - see below the help section. This tool is run as part of the scheduled pipeline to run every hour. It downloads the monitors config from kiban cluster
-then push the latest configuration into Gitlab - this project.
-
+This is a command line tool to sync and update the `Kibana object configs` - see below the help section. This tool is run as part of the scheduled pipeline to run every hour. It downloads the monitors config from kiban cluster
+then push the latest configuration into Gitlab - this project. The kibana objects supported are:
+1. Monitors
+2. Dashboards
+3. Saved search
+4. Destinations(slack, email etc)
 
 ```./kibana-sync -h
 This tool performs the followings:
@@ -38,7 +41,6 @@ The pipeline of this project is scheduled to run every hour, it's not triggered 
 The limitations of this tool are highlighted below. Hopefully, subsequent releases of this tool will address some of them
 
 1. The push command push all the configuration files present in the config folder regardless if there is a change or no. This is not an issue at all, but we can improve.
-2. Only handles Kibana montior configs, this tool can be extended to other kibana objects
 
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`

@@ -1,4 +1,4 @@
-module mkp-kibana-monitors
+module kib-sync
 
 go 1.14
 
