@@ -1,6 +1,6 @@
 package main
 
-import "mkp-kibana-monitors/cmd"
+import "kib-sync/cmd"
 
 func main() {
 	cmd.Execute()

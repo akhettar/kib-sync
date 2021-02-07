@@ -19,44 +19,68 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	es "kib-sync/client"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+const monitorSearchPath string = "_opendistro/_alerting/monitors/_search"
+
 var syncCmd = &cobra.Command{
 	Use:   "sync",
 	Short: "Fetch all configured monitors from Kibana cluster",
 	Long:  `The configured monitors are fetched from given kiban cluster and stored in json format in the config folder`,
-	Run:   SyncMonitors(),
+	Run:   SyncMonitors(NewQueryHandler()),
 }
 
-// SyncMonitors download all the configured monitors form Kibana cluster
-func SyncMonitors() func(cmd *cobra.Command, args []string) {
-	return func(cmd *cobra.Command, args []string) {
-		// create elk client
-		client := newClient(getValue(UserName), getValue(Password), getValue(URL))
+type QueryHandler func(path string, body []byte) (map[string]interface{}, error)
 
-		// download all the monitors
-		resp, err := client.Search(client.Search.WithBody(strings.NewReader("{\"size\": 10000, \"query\":{ \"bool\": {\"must\": { \"exists\": { \"field\" : \"monitor\" }}}}}")))
+func NewQueryHandler() QueryHandler {
+	return func(path string, body []byte) (map[string]interface{}, error) {
+		c := es.NewClient(getValue(URL), getValue(UserName), getValue(Password))
+
+		// query all monitors
+		res, err := c.Do(path, http.MethodGet, body)
+
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			ErrorLog.Fatal(err)
 		}
+		defer res.Body.Close()
 
+		if res.StatusCode >= 300 {
+			ErrorLog.Fatalf("Got response with status code: %d", res.StatusCode)
+		}
 		var r map[string]interface{}
 
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			ErrorLogger.Fatalf("Error parsing the response body: %s", err)
+		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+			ErrorLog.Fatalf("Error parsing the response body: %s", err)
 		}
 		// Print the response status, number of results, and request duration.
 		log.Printf(
-			"[%s] %d results; took: %dms",
-			resp.Status(),
+			"[%d] %d results; took: %dms",
+			res.StatusCode,
 			int(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64)),
 			int(r["took"].(float64)),
 		)
+		return r, nil
+	}
+}
+
+// SyncMonitors download all the configured monitors form Kibana cluster
+func SyncMonitors(handler QueryHandler) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+
+		r, err := handler(monitorSearchPath, []byte("{\"size\": 10000, \"query\":{ \"bool\": {\"must\": { \"exists\": { \"field\" : \"monitor\" }}}}}"))
+
+		InfoLog.Println(r)
+
+		if err != nil {
+			ErrorLog.Fatal(err)
+		}
 
 		// Print the ID and document source for each hit.
 		counter := 0
@@ -65,11 +89,11 @@ func SyncMonitors() func(cmd *cobra.Command, args []string) {
 			source := hit.(map[string]interface{})["_source"]
 			id := hit.(map[string]interface{})["_id"]
 			ids = append(ids, id.(string))
-			name := source.(map[string]interface{})["monitor"].(map[string]interface{})["name"].(string)
-			InfoLogger.Printf("successfully fetched Monitor name= %s", name)
+			name := source.(map[string]interface{})["name"].(string)
+			InfoLog.Printf("successfully fetched Monitor name= %s", name)
 			file, err := os.Create(fmt.Sprintf("%s/%s.json", "config", id))
 			if err != nil {
-				ErrorLogger.Println(err)
+				ErrorLog.Println(err)
 				continue
 			}
 			b, _ := json.MarshalIndent(hit, "", "\t")
@@ -78,7 +102,7 @@ func SyncMonitors() func(cmd *cobra.Command, args []string) {
 			counter++
 		}
 
-		InfoLogger.Printf("all of the %d kiban monitor configs successfully synched", counter)
+		InfoLog.Printf("all of the %d kiban monitor configs successfully synched", counter)
 
 		// remove the redundant configs
 		fileInfos, err := ioutil.ReadDir("config")
@@ -90,7 +114,7 @@ func SyncMonitors() func(cmd *cobra.Command, args []string) {
 		for _, fileInfo := range fileInfos {
 			id := strings.Split(fileInfo.Name(), ".")[0]
 			if !find(ids, id) {
-				WarningLogger.Printf("removing kiban config with id: %s", fileInfo.Name())
+				WarnLog.Printf("removing kiban config with id: %s", fileInfo.Name())
 				os.Remove(fmt.Sprintf("%s/%s", "config", fileInfo.Name()))
 			}
 		}

@@ -17,8 +17,10 @@ limitations under the License.
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	el "github.com/elastic/go-elasticsearch/v7"
@@ -35,12 +37,12 @@ const (
 )
 
 var (
-	// WarningLogger instance
-	WarningLogger *log.Logger
-	// InfoLogger instanace
-	InfoLogger *log.Logger
-	// ErrorLogger instance
-	ErrorLogger *log.Logger
+	// WarnLog instance
+	WarnLog *log.Logger
+	// InfoLog instanace
+	InfoLog *log.Logger
+	// ErrorLog instance
+	ErrorLog *log.Logger
 )
 
 var rootCmd = &cobra.Command{
@@ -65,9 +67,9 @@ func Execute() {
 func init() {
 
 	// set the logger
-	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	WarningLogger = log.New(os.Stdout, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	InfoLog = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarnLog = log.New(os.Stdout, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLog = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// declare all the possible flags for this app
 	rootCmd.PersistentFlags().String("username", "", "The kibana cluster username. This is required argument to connect to the ELK cluster")
@@ -77,13 +79,18 @@ func init() {
 	// add the command
 	rootCmd.AddCommand(syncCmd)
 	rootCmd.AddCommand(pushCmd)
+	rootCmd.AddCommand(createCmd)
 }
 
 func newClient(user, password, url string) *el.Client {
-	config := el.Config{Addresses: []string{url}, Username: user, Password: password}
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	config := el.Config{Addresses: []string{url}, Username: user, Password: password, Transport: tr}
 	el, err := el.NewClient(config)
 	if err != nil {
-		ErrorLogger.Fatalf("failed to create elastic search client %v", err)
+		ErrorLog.Fatalf("failed to create elastic search client %v", err)
 	}
 	return el
 }
@@ -91,10 +98,10 @@ func newClient(user, password, url string) *el.Client {
 func getValue(flag string) string {
 	value, err := rootCmd.PersistentFlags().GetString(flag)
 	if err != nil {
-		ErrorLogger.Fatalf("failed to get the required argement %s", flag)
+		ErrorLog.Fatalf("failed to get the required argement %s", flag)
 	}
 	if value == "" {
-		ErrorLogger.Fatalf("%s argument is required", flag)
+		ErrorLog.Fatalf("%s argument is required", flag)
 	}
 	return value
 }

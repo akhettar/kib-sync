@@ -1,0 +1,145 @@
+{
+	"_id": "ySUf4HUBJjEzokoVzxOU",
+	"_index": ".opendistro-alerting-config",
+	"_score": 1,
+	"_source": {
+		"monitor": {
+			"enabled": false,
+			"enabled_time": null,
+			"inputs": [
+				{
+					"search": {
+						"indices": [
+							"cwl-cr-emea-prod*"
+						],
+						"query": {
+							"query": {
+								"bool": {
+									"adjust_pure_negative": true,
+									"boost": 1,
+									"must": [
+										{
+											"match_phrase": {
+												"payload.customData.monitor-name": {
+													"boost": 1,
+													"query": "ProductMonitor",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"match_phrase": {
+												"payload.message": {
+													"boost": 1,
+													"query": "products with no price details",
+													"slop": 0,
+													"zero_terms_query": "NONE"
+												}
+											}
+										},
+										{
+											"range": {
+												"@timestamp": {
+													"boost": 1,
+													"format": "strict_date_optional_time",
+													"from": "now-6h",
+													"include_lower": true,
+													"include_upper": true,
+													"to": "now"
+												}
+											}
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			],
+			"last_update_time": 1607071639781,
+			"name": "CR - Product Price  Monitor",
+			"schedule": {
+				"period": {
+					"interval": 6,
+					"unit": "HOURS"
+				}
+			},
+			"schema_version": 1,
+			"triggers": [
+				{
+					"actions": [
+						{
+							"destination_id": "UYRiCHQBnr12y3m86JZT",
+							"id": "-Kcy4HUBJOkjlStk8v58",
+							"message_template": {
+								"lang": "mustache",
+								"source": " *{{ctx.monitor.name}} just entered alert status. Please investigate the orders below*\n- *Message*: {{ctx.results.0.hits.hits._source.payload.message}} --  \n:eyes: \u003chttps://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com/_plugin/kibana/app/kibana#/discover/74bdb4f0-1dc3-11eb-8208-dbdc90e322f9?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{ctx.results.0.hits.hits.0._source.@timestamp}}',to:'{{ctx.results.0.hits.hits.0._source.@timestamp}}'))\u0026_a=(columns:!(metaData.priority,context.correlationId,payload.message,payload.customData.orders,payload.customData.total),filters:!(('$state':(store:appState),exists:(field:context.correlationId),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:context.correlationId,negate:!f,type:exists,value:exists)),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',key:metaData.appName,negate:!f,params:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),type:phrase,value:{{ctx.results.0.hits.hits.0._source.metaData.appName}}),query:(match:(metaData.appName:(query:{{ctx.results.0.hits.hits.0._source.metaData.appName}},type:phrase))))),index:'37789dd0-dcbe-11ea-a74b-9338ed12b859',interval:auto,query:(language:kuery),sort:!(!('@timestamp',desc)))|Details\u003e\n- Trigger: {{ctx.trigger.name}}\n- Severity: {{ctx.trigger.severity}}\n- Period start: {{ctx.periodStart}}\n- Period end: {{ctx.periodEnd}}\n"
+							},
+							"name": "Product Price Trigger",
+							"subject_template": {
+								"lang": "mustache",
+								"source": ":sos: *Products details anomaly found*"
+							},
+							"throttle_enabled": false
+						}
+					],
+					"condition": {
+						"script": {
+							"lang": "painless",
+							"source": "ctx.results[0].hits.total.value \u003e 0"
+						}
+					},
+					"id": "96cy4HUBJOkjlStk8v58",
+					"name": "Product Price Details",
+					"severity": "1"
+				}
+			],
+			"type": "monitor",
+			"ui_metadata": {
+				"schedule": {
+					"cronExpression": "0 */1 * * *",
+					"daily": 0,
+					"frequency": "interval",
+					"monthly": {
+						"day": 1,
+						"type": "day"
+					},
+					"period": {
+						"interval": 6,
+						"unit": "HOURS"
+					},
+					"timezone": null,
+					"weekly": {
+						"fri": false,
+						"mon": false,
+						"sat": false,
+						"sun": false,
+						"thur": false,
+						"tue": false,
+						"wed": false
+					}
+				},
+				"search": {
+					"aggregationType": "count",
+					"bucketUnitOfTime": "h",
+					"bucketValue": 1,
+					"fieldName": "",
+					"groupedOverFieldName": "bytes",
+					"groupedOverTop": 5,
+					"overDocuments": "all documents",
+					"searchType": "query",
+					"timeField": "",
+					"where": {
+						"fieldName": [],
+						"fieldRangeEnd": 0,
+						"fieldRangeStart": 0,
+						"fieldValue": "",
+						"operator": "is"
+					}
+				}
+			}
+		}
+	},
+	"_type": "_doc"
+}

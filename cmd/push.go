@@ -55,7 +55,7 @@ func PushMonitorsConfig() func(cmd *cobra.Command, args []string) {
 
 			var m map[string]interface{}
 			if err := json.NewDecoder(strings.NewReader(string(bytes))).Decode(&m); err != nil {
-				ErrorLogger.Printf("failed to decode the monitor config: %s", err.Error())
+				ErrorLog.Printf("failed to decode the monitor config: %s", err.Error())
 				continue
 			}
 			index := m["_index"].(string)
@@ -74,13 +74,13 @@ func PushMonitorsConfig() func(cmd *cobra.Command, args []string) {
 				Refresh:      "true",
 			}
 			if err != nil {
-				ErrorLogger.Printf("Error getting response: %s", err.Error())
+				ErrorLog.Printf("Error getting response: %s", err.Error())
 				continue
 			}
 			res, err := req.Do(context.Background(), client)
 
 			if err != nil {
-				ErrorLogger.Printf("Error getting response: %s", err.Error())
+				ErrorLog.Printf("Error getting response: %s", err.Error())
 				continue
 			}
 
@@ -92,10 +92,10 @@ func PushMonitorsConfig() func(cmd *cobra.Command, args []string) {
 				// Deserialize the response into a map.
 				var r map[string]interface{}
 				if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-					ErrorLogger.Printf("Error parsing the response body: %s", err)
+					ErrorLog.Printf("Error parsing the response body: %s", err)
 				} else {
 					// Print the response status and indexed document version.
-					InfoLogger.Printf("[%s] %s; version=%d; monitor=%s", res.Status(), r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
+					InfoLog.Printf("[%s] %s; version=%d; monitor=%s", res.Status(), r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
 				}
 			}
 		}

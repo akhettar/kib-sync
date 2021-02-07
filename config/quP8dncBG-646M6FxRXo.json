@@ -1,0 +1,81 @@
+{
+	"_id": "quP8dncBG-646M6FxRXo",
+	"_index": ".opendistro-alerting-config",
+	"_primary_term": 1,
+	"_score": 1,
+	"_seq_no": 2,
+	"_source": {
+		"enabled": true,
+		"enabled_time": 1612609012895,
+		"inputs": [
+			{
+				"search": {
+					"indices": [
+						"kibana_sample_data_flights"
+					],
+					"query": {
+						"query": {
+							"match_all": {
+								"boost": 1
+							}
+						},
+						"size": 0
+					}
+				}
+			}
+		],
+		"last_update_time": 1612632725396,
+		"name": "Test monitor",
+		"schedule": {
+			"period": {
+				"interval": 1,
+				"unit": "MINUTES"
+			}
+		},
+		"schema_version": 3,
+		"triggers": [
+			{
+				"actions": [
+					{
+						"destination_id": "q-P9dncBG-646M6FFBXc",
+						"id": "--NmeHcBG-646M6FlxWT",
+						"message_template": {
+							"lang": "mustache",
+							"source": "Monitor {{ctx.monitor.name}} just entered alert status. Please investigate the issue.\n- Trigger: {{ctx.trigger.name}}\n- Severity: {{ctx.trigger.severity}}\n- Period start: {{ctx.periodStart}}\n- Period end: {{ctx.periodEnd}}"
+						},
+						"name": "Trigger action",
+						"subject_template": {
+							"lang": "mustache",
+							"source": "Trigger message"
+						},
+						"throttle_enabled": false
+					}
+				],
+				"condition": {
+					"script": {
+						"lang": "painless",
+						"source": "ctx.results[0].hits.total.value \u003e 0"
+					}
+				},
+				"id": "-uNmeHcBG-646M6FlxWR",
+				"name": "Test trigger",
+				"severity": "1"
+			}
+		],
+		"type": "monitor",
+		"user": {
+			"backend_roles": [
+				"admin"
+			],
+			"custom_attribute_names": [],
+			"name": "admin",
+			"roles": [
+				"all_access",
+				"own_index"
+			],
+			"user_requested_tenant": null
+		}
+	},
+	"_type": "_doc",
+	"_version": 2
+}
