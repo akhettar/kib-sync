@@ -57,5 +57,14 @@ The push command read all the monitor configs present in the local `./config fol
 ```
 
 
+## Open distro
+
+You can run the following command to install opendistro
+
+`docker run -p 9200:9200 -p 9600:9600 -e "discovery.type=single-node" amazon/opendistro-for-elasticsearch:1.12.0`
+
+More details on getting started with ELK Open distro can be found [here](https://opendistro.github.io/for-elasticsearch-docs/#get-started)
+
+
 
 

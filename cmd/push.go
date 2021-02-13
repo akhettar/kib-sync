@@ -50,64 +50,52 @@ func PushConfigs() func(cmd *cobra.Command, args []string) {
 
 		// Process all the kibana config and push the update to Kibana cluster
 		for _, fileInfo := range fileInfos {
-			config := fileInfo.Name()
-			if fileInfo.IsDir() {
-				fileInfos, err = ioutil.ReadDir(fmt.Sprintf("%s/%s", "config", config))
-				if err != nil {
-					log.Fatal(err)
-				}
+			log.Printf("pushing kibana config: %s to kiban cluster", strings.SplitAfter(fileInfo.Name(), ".")[0])
+			bytes, _ := ioutil.ReadFile(fmt.Sprintf("config/%s", fileInfo.Name()))
 
-				for _, fileInfo = range fileInfos {
+			var m map[string]interface{}
+			if err := json.NewDecoder(strings.NewReader(string(bytes))).Decode(&m); err != nil {
+				ErrorLog.Printf("failed to decode the monitor config: %s", err.Error())
+				continue
+			}
+			index := m["_index"].(string)
+			documentID := m["_id"].(string)
+			monitorDoc := m["_source"].(map[string]interface{})
+			docBytes, err := json.Marshal(&monitorDoc)
+			if err != nil {
+				log.Fatal("failed to marshall the monitor doc")
+			}
+			log.Printf("pushing monitor config for document id: %s", documentID)
+			req := esapi.IndexRequest{
+				Index:        index,
+				DocumentID:   documentID,
+				DocumentType: "_doc",
+				Body:         strings.NewReader(string(docBytes)),
+				Refresh:      "true",
+			}
+			if err != nil {
+				ErrorLog.Printf("Error getting response: %s", err.Error())
+				continue
+			}
+			res, err := req.Do(context.Background(), client)
 
-					log.Printf("pushing kibana config: %s to kiban cluster", strings.SplitAfter(fileInfo.Name(), ".")[0])
-					bytes, _ := ioutil.ReadFile(fmt.Sprintf("config/%s/%s", config, fileInfo.Name()))
+			if err != nil {
+				ErrorLog.Printf("Error getting response: %s", err.Error())
+				continue
+			}
 
-					var m map[string]interface{}
-					if err := json.NewDecoder(strings.NewReader(string(bytes))).Decode(&m); err != nil {
-						ErrorLogger.Printf("failed to decode the kibana config: %s", err.Error())
-						continue
-					}
-					index := m["_index"].(string)
-					documentID := m["_id"].(string)
-					monitorDoc := m["_source"].(map[string]interface{})
-					docBytes, err := json.Marshal(&monitorDoc)
-					if err != nil {
-						log.Fatal("failed to marshall the kibana config")
-					}
-					log.Printf("pushing kibana config for document id: %s", documentID)
-					req := esapi.IndexRequest{
-						Index:        index,
-						DocumentID:   documentID,
-						DocumentType: "_doc",
-						Body:         strings.NewReader(string(docBytes)),
-						Refresh:      "true",
-					}
-					if err != nil {
-						ErrorLogger.Printf("Error getting response: %s", err.Error())
-						continue
-					}
-					res, err := req.Do(context.Background(), client)
+			defer res.Body.Close()
 
-					if err != nil {
-						ErrorLogger.Printf("Error getting response: %s", err.Error())
-						continue
-					}
-
-					defer res.Body.Close()
-
-					if res.IsError() {
-						log.Printf("[%s] Error indexing document", res.Status())
-					} else {
-						// Deserialize the response into a map.
-						var r map[string]interface{}
-						if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-							ErrorLogger.Printf("Error parsing the response body: %s", err)
-						} else {
-							// Print the response status and indexed document version.
-							InfoLogger.Printf("[%s] %s; version=%d; config=%s", res.Status(), r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
-						}
-					}
-
+			if res.IsError() {
+				log.Printf("[%s] Error indexing document", res.Status())
+			} else {
+				// Deserialize the response into a map.
+				var r map[string]interface{}
+				if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+					ErrorLog.Printf("Error parsing the response body: %s", err)
+				} else {
+					// Print the response status and indexed document version.
+					InfoLog.Printf("[%s] %s; version=%d; monitor=%s", res.Status(), r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
 				}
 			}
 
