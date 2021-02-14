@@ -1,8 +1,9 @@
 
 ![go](go.png)
 # odfe-kibana-sync 
+
 ## Overview
-This is a command line tool to sync and cfeate the `Kibana object configs` - see below the help section. This tool assumes that Kibana cluster holds the source of the truth in relation to the configuration file. The sole purpose of this tool is to be run periodically to sync these configuration files with the a given Git repository.
+This is a command line tool to sync and create the `Kibana object configs` from a given [open distro elk cluster](https://opendistro.github.io/for-elasticsearch-docs/) - see below the help section. This tool assumes that Kibana cluster holds the source of the truth in relation to the configuration file. The sole purpose of this tool is to be run periodically to sync these configuration files with the a given Git repository.
 
 Idelly, this tool should be run in a CI pipeline for a given project that hosts Kibana configuration files - see example Github project.
 
@@ -39,7 +40,6 @@ Use "odfe-kibana-sync [command] --help" for more information about a command.
 ```
 
 
-
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`
 
@@ -47,24 +47,7 @@ The sync command fetches all the monitors config defined in the given kibana clu
 ./odfe-kibana-sync sync --username admin --password admin --url https://localhost:9200
 ```
 
-## Invoking the create command
-The push command read all the monitor configs present in the local `./config folder` and push them into Kiban cluster
-
-```
-./odfe-kibana-sync push --username admin --password admin --url https://localhost:9200
-```
-
-## Open distro
-
-You can run the following command to install opendistro
-
-`docker run -p 9200:9200 -p 9600:9600 -e "discovery.type=single-node" amazon/opendistro-for-elasticsearch:1.12.0`
-
-More details on getting started with ELK Open distro can be found [here](https://opendistro.github.io/for-elasticsearch-docs/#get-started)
-
-
-
-
+The above command should produce a `config` folder containing the following structure (of course depending on the kiban objects configured in the cluster)
 ```
 ├── config
 │   ├── dashboard
@@ -81,4 +64,24 @@ More details on getting started with ELK Open distro can be found [here](https:/
 │       ├── search:3ba638e0-b894-11e8-a6d9-e546fe2bba5f.json
 │       └── search:571aaf70-4c88-11e8-b3d7-01146121b73d.json
 ```
+
+## Invoking the create command
+The create command read all the kibana configs present in the local `./config folder` and push them into Kiban cluster
+
+```
+./odfe-kibana-sync push --username admin --password admin --url https://localhost:9200
+```
+
+## Open distro
+
+You can run the following command to install opendistro
+
+`docker run -p 9200:9200 -p 9600:9600 -e "discovery.type=single-node" amazon/opendistro-for-elasticsearch:1.12.0`
+
+More details on getting started with ELK Open distro can be found [here](https://opendistro.github.io/for-elasticsearch-docs/#get-started)
+
+
+
+
+
 
