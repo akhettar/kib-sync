@@ -21,11 +21,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	es "odfe-kibana-sync/client"
 	"os"
 	"strings"
 
-	"odfe-kibana-sync/model"
+	es "github.com/akhettar/odfe-kibana-sync/client"
+
+	"github.com/akhettar/odfe-kibana-sync/model"
 
 	"github.com/spf13/cobra"
 )

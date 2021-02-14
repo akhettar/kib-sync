@@ -1,4 +1,4 @@
-module odfe-kibana-sync
+module github.com/akhettar/odfe-kibana-sync
 
 go 1.14
 

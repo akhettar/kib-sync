@@ -19,7 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	es "odfe-kibana-sync/client"
+
+	es "github.com/akhettar/odfe-kibana-sync/client"
 
 	"log"
 	"net/http"
