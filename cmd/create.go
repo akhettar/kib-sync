@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	es "kib-sync/client"
+	es "odfe-kibana-sync/client"
 
 	"log"
 	"net/http"
@@ -31,14 +31,15 @@ import (
 // creates cobra command that represents the push command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "create monitors in the given kiban cluster",
-	Long:  `create monitors in the given kiban cluster`,
-	Run:   createMonitorsConfig(newCreateHandler()),
+	Short: "create all kiban objects (monitors, dashbaor, etc) present in the config folder",
+	Long:  `create monitors, destinations, dashboards, email accoutns, group emails, search in the given kibana cluster`,
+	Run:   createKibanaConfig(newCreateHandler()),
 }
 
-type createHandler func(url string, body []byte) (*http.Response, error)
+// CreateHandler function implementation of the Create Kibana config
+type CreateHandler func(url string, body []byte) (*http.Response, error)
 
-func newCreateHandler() createHandler {
+func newCreateHandler() CreateHandler {
 	return func(path string, body []byte) (*http.Response, error) {
 		// create http client
 		client := es.NewClient(getValue(URL), getValue(UserName), getValue(Password))
@@ -48,17 +49,18 @@ func newCreateHandler() createHandler {
 	}
 }
 
-// PushMonitorsConfig pushes the monitor config to kibana cluster
-func createMonitorsConfig(handler createHandler) func(cmd *cobra.Command, args []string) {
+func createKibanaConfig(handler CreateHandler) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
+
+		// crete parent config directory
 		log.Println("invoking create kibana config")
-		configs, err := ioutil.ReadDir("config")
+		configs, err := ioutil.ReadDir(getValue(WorkDir))
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for _, config := range configs {
-			fileInfos, err := ioutil.ReadDir("config/" + config.Name())
+			fileInfos, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", getValue(WorkDir), config.Name()))
 			if err != nil {
 				ErrorLog.Printf("failed to read dir: %s", config.Name())
 				continue
@@ -68,7 +70,7 @@ func createMonitorsConfig(handler createHandler) func(cmd *cobra.Command, args [
 			for _, fileInfo := range fileInfos {
 
 				log.Printf("creating kibana %s: %s to kiban cluster", config.Name(), fileInfo.Name())
-				filename := fmt.Sprintf("config/%s/%s", config.Name(), fileInfo.Name())
+				filename := fmt.Sprintf("%s/%s/%s", getValue(WorkDir), config.Name(), fileInfo.Name())
 				bytes, err := ioutil.ReadFile(filename)
 				if err != nil {
 					ErrorLog.Printf("failed to read the content of the file %s", filename)
@@ -91,13 +93,13 @@ func createMonitorsConfig(handler createHandler) func(cmd *cobra.Command, args [
 					ErrorLog.Printf("failed to decode the request body for config: %s", filename)
 					continue
 				}
+				// create kibana object
 				res, err := handler(path(config.Name(), index, documentID), body)
 
 				if err != nil {
 					ErrorLog.Printf("Error getting response: %s", err.Error())
 					continue
 				}
-
 				defer res.Body.Close()
 
 				if res.StatusCode >= 300 {
@@ -109,7 +111,7 @@ func createMonitorsConfig(handler createHandler) func(cmd *cobra.Command, args [
 						ErrorLog.Printf("Error parsing the response body: %s", err)
 					} else {
 						// Print the response status and indexed document version.
-						InfoLog.Printf("[%d] %s; version=%d; monitor=%s", res.StatusCode, r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
+						InfoLog.Printf("[%d] %s; version=%d; config=%s", res.StatusCode, r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
 					}
 				}
 			}

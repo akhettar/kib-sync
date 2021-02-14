@@ -1,6 +1,6 @@
 package main
 
-import "kib-sync/cmd"
+import "odfe-kibana-sync/cmd"
 
 func main() {
 	cmd.Execute()

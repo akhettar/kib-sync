@@ -1,27 +1,21 @@
 {
-	"_id": "Ojjkn3cBQsLc2q1jmiT6",
+	"_id": "hXqmoXcBbX-aeATo_SoV",
 	"_index": ".opendistro-alerting-config",
 	"_primary_term": 2,
 	"_score": 1,
-	"_seq_no": 82,
+	"_seq_no": 8,
 	"_source": {
 		"destination": {
-			"email": {
-				"email_account_id": "3OOun3cBG-646M6FGRxJ",
-				"recipients": [
-					{
-						"email_group_id": "2OOtn3cBG-646M6FXxwt",
-						"type": "email_group"
-					}
-				]
-			},
 			"id": "",
-			"last_update_time": 1613291803182,
-			"name": "Test mail",
+			"last_update_time": 1612722739941,
+			"name": "Slack",
 			"primary_term": 0,
 			"schema_version": 3,
 			"seq_no": 0,
-			"type": "email",
+			"slack": {
+				"url": "https://hooks.slack.com/services/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"
+			},
+			"type": "slack",
 			"user": {
 				"backend_roles": [
 					"admin"

@@ -19,34 +19,43 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	es "kib-sync/client"
 	"log"
 	"net/http"
+	es "odfe-kibana-sync/client"
 	"os"
 	"strings"
 
-	"kib-sync/model"
+	"odfe-kibana-sync/model"
 
 	"github.com/spf13/cobra"
 )
 
 const (
-	alertQueryPath string = "_opendistro/_alerting/monitors/_search"
-	searchQueryPath  string = "_search"
+	alertQueryPath  string = "_opendistro/_alerting/monitors/_search"
+	searchQueryPath string = "_search"
 )
+
+var configs []string = []string{"monitor", "email_account", "email_group", "dashboard", "search", "destination"}
 
 var syncCmd = &cobra.Command{
 	Use:   "sync",
-	Short: "Fetch all configured monitors from Kibana cluster",
-	Long:  `The configured monitors are fetched from given kiban cluster and stored in json format in the config folder`,
-	Run:   SyncConfig(NewQueryHandler()),
+	Short: "Fetches Kiban objects (monitor, dashbaord, etc) from Kibana cluster",
+	Long:  `Fetches monitor, destination, group account, email accuont, dashboard and searches configuratio file from Kibana cluster`,
+	Run:   SyncConfig(newQueryHandler(), configs),
 }
 
+// QueryHandler function implementing the synch command
 type QueryHandler func(path string, body []byte) (map[string]interface{}, error)
 
-func NewQueryHandler() QueryHandler {
-	return func(path string, body []byte) (map[string]interface{}, error) {
+func newQueryHandler() QueryHandler {
+	return func(config string, body []byte) (map[string]interface{}, error) {
 		c := es.NewClient(getValue(URL), getValue(UserName), getValue(Password))
+		var path string
+		if config == "search" || config == "dashboard" {
+			path = searchQueryPath
+		} else {
+			path = alertQueryPath
+		}
 
 		// query all monitors
 		res, err := c.Do(path, http.MethodGet, body)
@@ -77,14 +86,13 @@ func NewQueryHandler() QueryHandler {
 }
 
 // SyncConfig download all the configured monitors form Kibana cluster
-func SyncConfig(handler QueryHandler) func(cmd *cobra.Command, args []string) {
+func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 
 		// crete parent config directory
-		createDir("config")
+		createDir(getValue(WorkDir))
 
 		// Query all the config of the following kiban objects
-		configs := []string{"monitor", "email_account", "email_group","dashboard", "search", "destination"}
 		for _, config := range configs {
 
 			InfoLog.Printf("querying kiban config %s", config)
@@ -93,23 +101,15 @@ func SyncConfig(handler QueryHandler) func(cmd *cobra.Command, args []string) {
 			if err != nil {
 				ErrorLog.Fatal("failed to marshal the query request")
 			}
-			var path string
-
-			if config == "search" || config == "dashboard" { 
-				path = searchQueryPath
-			} else {
-				path = alertQueryPath
-			}
 
 			// Run the query
-			r, err := handler(path, query)
+			r, err := handler(config, query)
 
 			if err != nil {
-				ErrorLog.Fatal(err)
+				ErrorLog.Printf("failed to fetch config file for %s", config)
+				continue
 			}
-
-			// Create folder if not exist for the configuration files for the given condfig
-			createDir(fmt.Sprintf("%s/%s", "config", config))
+			createDir(fmt.Sprintf("%s/%s", getValue(WorkDir), config))
 
 			// Print the ID and document source for each hit.
 			counter := 0
@@ -127,6 +127,7 @@ func SyncConfig(handler QueryHandler) func(cmd *cobra.Command, args []string) {
 				b, err := json.MarshalIndent(hit, "", "\t")
 				if err != nil {
 					ErrorLog.Printf("failed to marshall the resposne: %v", err.Error())
+					continue
 				}
 				file.WriteString(string(b))
 				file.Close()
@@ -135,7 +136,7 @@ func SyncConfig(handler QueryHandler) func(cmd *cobra.Command, args []string) {
 
 			InfoLog.Printf("all of the %d kiban monitor configs successfully synched", counter)
 			// remove the redundant configs
-			fileInfos, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", "config", config))
+			fileInfos, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", getValue(WorkDir), config))
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -145,20 +146,9 @@ func SyncConfig(handler QueryHandler) func(cmd *cobra.Command, args []string) {
 				id := strings.Split(fileInfo.Name(), ".")[0]
 				if !find(ids, id) {
 					WarnLog.Printf("removing kiban config with id: %s", fileInfo.Name())
-					os.Remove(fmt.Sprintf("%s/%s", "config", fileInfo.Name()))
+					os.Remove(fmt.Sprintf("%s/%s", getValue(WorkDir), fileInfo.Name()))
 				}
 			}
-		}
-
-	}
-}
-
-func createDir(name string) {
-	_, err := os.Stat(name)
-	if os.IsNotExist(err) {
-		errDir := os.MkdirAll(name, 0755)
-		if errDir != nil {
-			log.Fatal(err)
 		}
 
 	}

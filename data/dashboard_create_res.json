@@ -1,0 +1,14 @@
+{
+    "_index": ".kibana_92668751_admin_1",
+    "_type": "_doc",
+    "_id": "dashboard:722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+    "_version": 9,
+    "result": "created",
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0
+    },
+    "_seq_no": 112,
+    "_primary_term": 2
+}

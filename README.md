@@ -1,61 +1,58 @@
-mkp-kibana-monitors
 
-# Overview
-This is a command line tool to sync and update the `Kibana object configs` - see below the help section. This tool is run as part of the scheduled pipeline to run every hour. It downloads the monitors config from kiban cluster
-then push the latest configuration into Gitlab - this project. The kibana objects supported are:
+![go](go.png)
+# odfe-kibana-sync 
+## Overview
+This is a command line tool to sync and cfeate the `Kibana object configs` - see below the help section. This tool assumes that Kibana cluster holds the source of the truth in relation to the configuration file. The sole purpose of this tool is to be run periodically to sync these configuration files with the a given Git repository.
+
+Idelly, this tool should be run in a CI pipeline for a given project that hosts Kibana configuration files - see example Github project.
+
+The following kibana configuration files can be synched and created in a given kiban instance:
 1. Monitors
 2. Dashboards
 3. Saved search
 4. Destinations(slack, email etc)
+5. Email accounts
+6. Group email
 
-```./kibana-sync -h
+```./odfe-kibana-sync -h
 This tool performs the followings:
-                1. Fetches configured monitors for the given kibana cluster and store them locally as json files.
+                1. Fetches configured monitors, dashboards, alert destinations for the given kibana cluster and store them locally as json files.
                 2. Pushes the changes done to the monitor's config to Kiban cluster
 
 Usage:
-  kibana-sync [flags]
-  kibana-sync [command]
+  odfe-kibana-sync [flags]
+  odfe-kibana-sync [command]
 
 Available Commands:
+  create      create all kiban objects (monitors, dashbaor, etc) present in the config folder
   help        Help about any command
-  sync        Fetch all configured monitors from Kibana cluster
-  push      pushes the monitor's config to Kibana cluster
+  sync        Fetches Kiban objects (monitor, dashbaord, etc) from Kibana cluster
 
 Flags:
-  -h, --help              help for kibana-sync
+  -h, --help              help for odfe-kibana-sync
       --password string   The kibana cluster password. This is a required argument to connect to the ELK cluster
       --url string        The kibana cluster url. This is required argument to connect to the ELk cluster
       --username string   The kibana cluster username. This is required argument to connect to the ELK cluster
+      --workdir string    The working directory where the kibana configuration files will be stored (default "config")
 
-Use "kibana-sync [command] --help" for more information about a command.
+Use "odfe-kibana-sync [command] --help" for more information about a command.
 ```
 
-## The pipeline
 
-The pipeline of this project is scheduled to run every hour, it's not triggered by push to master. So any changes to Kibana monitor config will get picked up every hour or so.
-
-
-## Limitations
-
-The limitations of this tool are highlighted below. Hopefully, subsequent releases of this tool will address some of them
-
-1. The push command push all the configuration files present in the config folder regardless if there is a change or no. This is not an issue at all, but we can improve.
 
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`
 
 ```
-./kibana-sync sync --username VF_Kibana_EMEA --password Vfkibana***** --url https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com
+./odfe-kibana-sync sync --username admin --password admin --url https://localhost:9200
 ```
 
-## Invoking the push command
+## Invoking the create command
 The push command read all the monitor configs present in the local `./config folder` and push them into Kiban cluster
 
 ```
-./kibana-sync push --username VF_Kibana_EMEA --password Vfkibana****** --url https://vpc-vf-sysint-emea-es-ir-jiqfwlmrnmrkm7ydovqpsvqueu.eu-west-1.es.amazonaws.com
+./odfe-kibana-sync push --username admin --password admin --url https://localhost:9200
 ```
-
 
 ## Open distro
 
@@ -67,4 +64,21 @@ More details on getting started with ELK Open distro can be found [here](https:/
 
 
 
+
+```
+├── config
+│   ├── dashboard
+│   │   ├── dashboard:4b85e090-f4be-11ea-8342-bf90f7b9d26e.json
+│   │   ├── dashboard:722b74f0-b882-11e8-a6d9-e546fe2bba5f.json
+│   │   └── dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b.json
+│   ├── destination
+│   │   └── XILEfXcBZWXOV7PGGr3r.json
+│   ├── email_account
+│   ├── email_group
+│   ├── monitor
+│   │   └── 13otoHcBbX-aeATowSlk.json
+│   └── search
+│       ├── search:3ba638e0-b894-11e8-a6d9-e546fe2bba5f.json
+│       └── search:571aaf70-4c88-11e8-b3d7-01146121b73d.json
+```
 

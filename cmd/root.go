@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -30,6 +31,8 @@ const (
 	Password = "password"
 	// URL the elk url
 	URL = "url"
+	// WorkDir the working dir where the configuration will be stored
+	WorkDir = "workdir"
 )
 
 var (
@@ -42,10 +45,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "kibana-sync",
-	Short: "Kibsync is a tool that fetches configured monitors",
+	Use:   "odfe-kibana-sync",
+	Short: "Kibsync is a tool that fetches configured objects in kibana cluster",
 	Long: `This tool performs the followings:
-		1. Fetches configured monitors for the given kibana cluster and store them locally as json files.
+		1. Fetches configured monitors, dashboards, alert destinations for the given kibana cluster and store them locally as json files.
 		2. Pushes the changes done to the monitor's config to Kiban cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("running kibana synchronizer")
@@ -71,6 +74,7 @@ func init() {
 	rootCmd.PersistentFlags().String("username", "", "The kibana cluster username. This is required argument to connect to the ELK cluster")
 	rootCmd.PersistentFlags().String("password", "", "The kibana cluster password. This is a required argument to connect to the ELK cluster")
 	rootCmd.PersistentFlags().String("url", "", "The kibana cluster url. This is required argument to connect to the ELk cluster")
+	rootCmd.PersistentFlags().String("workdir", "config", "The working directory where the kibana configuration files will be stored")
 
 	// add the command
 	rootCmd.AddCommand(syncCmd)
@@ -86,4 +90,15 @@ func getValue(flag string) string {
 		ErrorLog.Fatalf("%s argument is required", flag)
 	}
 	return value
+}
+
+func createDir(name string) {
+	_, err := os.Stat(name)
+	if os.IsNotExist(err) {
+		errDir := os.MkdirAll(name, 0755)
+		if errDir != nil {
+			log.Fatal(err)
+		}
+
+	}
 }

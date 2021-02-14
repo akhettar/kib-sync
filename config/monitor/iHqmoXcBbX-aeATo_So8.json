@@ -1,38 +1,22 @@
 {
-	"_id": "RTjkn3cBQsLc2q1jnCR2",
+	"_id": "iHqmoXcBbX-aeATo_So8",
 	"_index": ".opendistro-alerting-config",
 	"_primary_term": 2,
 	"_score": 1,
-	"_seq_no": 87,
+	"_seq_no": 9,
 	"_source": {
 		"enabled": true,
-		"enabled_time": 1613290932854,
+		"enabled_time": 1613300089145,
 		"inputs": [
 			{
 				"search": {
 					"indices": [
-						"kibana_sample_data_logs"
+						"kibana_sample_data_flights"
 					],
 					"query": {
-						"aggregations": {},
 						"query": {
-							"bool": {
-								"adjust_pure_negative": true,
-								"boost": 1,
-								"filter": [
-									{
-										"range": {
-											"@timestamp": {
-												"boost": 1,
-												"format": "epoch_millis",
-												"from": "||-1h",
-												"include_lower": true,
-												"include_upper": true,
-												"to": ""
-											}
-										}
-									}
-								]
+							"match_all": {
+								"boost": 1
 							}
 						},
 						"size": 0
@@ -40,8 +24,8 @@
 				}
 			}
 		],
-		"last_update_time": 1613295295595,
-		"name": "test-monitor",
+		"last_update_time": 1613324811575,
+		"name": "test",
 		"schedule": {
 			"period": {
 				"interval": 1,
@@ -53,16 +37,16 @@
 			{
 				"actions": [
 					{
-						"destination_id": "ld7912sBlQ5JUWWFThoW",
-						"id": "ouOin3cBG-646M6FChx2",
+						"destination_id": "XILEfXcBZWXOV7PGGr3r",
+						"id": "2XotoHcBbX-aeATo-Cmn",
 						"message_template": {
 							"lang": "mustache",
-							"source": "This is my message body."
+							"source": "Monitor {{ctx.monitor.name}} just entered alert status. Please investigate the issue.\n- Trigger: {{ctx.trigger.name}}\n- Severity: {{ctx.trigger.severity}}\n- Period start: {{ctx.periodStart}}\n- Period end: {{ctx.periodEnd}}"
 						},
-						"name": "test-action",
+						"name": "test",
 						"subject_template": {
 							"lang": "mustache",
-							"source": "TheSubject"
+							"source": "test"
 						},
 						"throttle_enabled": false
 					}
@@ -73,8 +57,8 @@
 						"source": "ctx.results[0].hits.total.value \u003e 0"
 					}
 				},
-				"id": "oeOin3cBG-646M6FChx2",
-				"name": "test-trigger",
+				"id": "2HotoHcBbX-aeATo-Cmm",
+				"name": "test",
 				"severity": "1"
 			}
 		],
