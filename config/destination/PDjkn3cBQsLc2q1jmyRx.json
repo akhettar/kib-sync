@@ -1,0 +1,41 @@
+{
+	"_id": "PDjkn3cBQsLc2q1jmyRx",
+	"_index": ".opendistro-alerting-config",
+	"_primary_term": 2,
+	"_score": 1,
+	"_seq_no": 84,
+	"_source": {
+		"destination": {
+			"email": {
+				"email_account_id": "3OOun3cBG-646M6FGRxJ",
+				"recipients": [
+					{
+						"email_group_id": "2OOtn3cBG-646M6FXxwt",
+						"type": "email_group"
+					}
+				]
+			},
+			"id": "",
+			"last_update_time": 1613291803182,
+			"name": "Test mail",
+			"primary_term": 0,
+			"schema_version": 3,
+			"seq_no": 0,
+			"type": "email",
+			"user": {
+				"backend_roles": [
+					"admin"
+				],
+				"custom_attribute_names": [],
+				"name": "admin",
+				"roles": [
+					"all_access",
+					"own_index"
+				],
+				"user_requested_tenant": null
+			}
+		}
+	},
+	"_type": "_doc",
+	"_version": 1
+}

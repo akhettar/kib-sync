@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	monitorQueryPath string = "_opendistro/_alerting/monitors/_search"
+	alertQueryPath string = "_opendistro/_alerting/monitors/_search"
 	searchQueryPath  string = "_search"
 )
 
@@ -39,7 +39,7 @@ var syncCmd = &cobra.Command{
 	Use:   "sync",
 	Short: "Fetch all configured monitors from Kibana cluster",
 	Long:  `The configured monitors are fetched from given kiban cluster and stored in json format in the config folder`,
-	Run:   SyncMonitors(NewQueryHandler()),
+	Run:   SyncConfig(NewQueryHandler()),
 }
 
 type QueryHandler func(path string, body []byte) (map[string]interface{}, error)
@@ -76,27 +76,29 @@ func NewQueryHandler() QueryHandler {
 	}
 }
 
-// SyncMonitors download all the configured monitors form Kibana cluster
-func SyncMonitors(handler QueryHandler) func(cmd *cobra.Command, args []string) {
+// SyncConfig download all the configured monitors form Kibana cluster
+func SyncConfig(handler QueryHandler) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 
 		// crete parent config directory
 		createDir("config")
 
 		// Query all the config of the following kiban objects
-		objects := []string{"monitor", "dashboard", "search", "destination"}
-		for _, obj := range objects {
-			query, err := json.Marshal(model.QueryRequest{Size: 1000, Query: model.Query{model.Bool{model.Must{model.Exists{obj}}}}})
+		configs := []string{"monitor", "email_account", "email_group","dashboard", "search", "destination"}
+		for _, config := range configs {
+
+			InfoLog.Printf("querying kiban config %s", config)
+			query, err := json.Marshal(model.QueryRequest{Size: 10000, Query: model.Query{model.Bool{model.Must{model.Exists{config}}}}})
 
 			if err != nil {
 				ErrorLog.Fatal("failed to marshal the query request")
 			}
 			var path string
 
-			if obj == "monitor" {
-				path = monitorQueryPath
-			} else {
+			if config == "search" || config == "dashboard" { 
 				path = searchQueryPath
+			} else {
+				path = alertQueryPath
 			}
 
 			// Run the query
@@ -107,7 +109,7 @@ func SyncMonitors(handler QueryHandler) func(cmd *cobra.Command, args []string) 
 			}
 
 			// Create folder if not exist for the configuration files for the given condfig
-			createDir(fmt.Sprintf("%s/%s", "config", obj))
+			createDir(fmt.Sprintf("%s/%s", "config", config))
 
 			// Print the ID and document source for each hit.
 			counter := 0
@@ -115,8 +117,8 @@ func SyncMonitors(handler QueryHandler) func(cmd *cobra.Command, args []string) 
 			for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
 				id := hit.(map[string]interface{})["_id"]
 				ids = append(ids, id.(string))
-				InfoLog.Printf("successfully fetched %s id= %s", obj, id)
-				file, err := os.Create(fmt.Sprintf("%s/%s/%s.json", "config", obj, id))
+				InfoLog.Printf("successfully fetched %s id= %s", config, id)
+				file, err := os.Create(fmt.Sprintf("%s/%s/%s.json", "config", config, id))
 				if err != nil {
 					ErrorLog.Println(err)
 					continue
@@ -133,7 +135,7 @@ func SyncMonitors(handler QueryHandler) func(cmd *cobra.Command, args []string) 
 
 			InfoLog.Printf("all of the %d kiban monitor configs successfully synched", counter)
 			// remove the redundant configs
-			fileInfos, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", "config", obj))
+			fileInfos, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", "config", config))
 			if err != nil {
 				log.Fatal(err)
 			}

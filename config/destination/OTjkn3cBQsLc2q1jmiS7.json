@@ -1,0 +1,35 @@
+{
+	"_id": "OTjkn3cBQsLc2q1jmiS7",
+	"_index": ".opendistro-alerting-config",
+	"_primary_term": 2,
+	"_score": 1,
+	"_seq_no": 81,
+	"_source": {
+		"destination": {
+			"id": "",
+			"last_update_time": 1613288153121,
+			"name": "test",
+			"primary_term": 0,
+			"schema_version": 3,
+			"seq_no": 0,
+			"slack": {
+				"url": "https://hooks.slack.com/services/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"
+			},
+			"type": "slack",
+			"user": {
+				"backend_roles": [
+					"admin"
+				],
+				"custom_attribute_names": [],
+				"name": "admin",
+				"roles": [
+					"all_access",
+					"own_index"
+				],
+				"user_requested_tenant": null
+			}
+		}
+	},
+	"_type": "_doc",
+	"_version": 1
+}

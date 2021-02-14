@@ -1,0 +1,33 @@
+{
+	"_id": "search:69cfd760-6e06-11eb-83d1-a13f173891a2",
+	"_index": ".kibana_92668751_admin_1",
+	"_score": 1,
+	"_source": {
+		"migrationVersion": {
+			"search": "7.9.3"
+		},
+		"references": [
+			{
+				"id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+				"name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+				"type": "index-pattern"
+			}
+		],
+		"search": {
+			"columns": [
+				"category"
+			],
+			"description": "",
+			"hits": 0,
+			"kibanaSavedObjectMeta": {
+				"searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+			},
+			"sort": [],
+			"title": "womenCat",
+			"version": 1
+		},
+		"type": "search",
+		"updated_at": "2021-02-13T14:18:58.901Z"
+	},
+	"_type": "_doc"
+}

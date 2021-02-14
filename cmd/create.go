@@ -51,58 +51,97 @@ func newCreateHandler() createHandler {
 // PushMonitorsConfig pushes the monitor config to kibana cluster
 func createMonitorsConfig(handler createHandler) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
-
-		log.Println("invoking create command")
-
-		fileInfos, err := ioutil.ReadDir("monitors")
+		log.Println("invoking create kibana config")
+		configs, err := ioutil.ReadDir("config")
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// Process all the kibana monitor config and push the update to Kibana
-		for _, fileInfo := range fileInfos {
-			log.Printf("creating kibana monitor: %s to kiban cluster", strings.SplitAfter(fileInfo.Name(), ".")[0])
-			bytes, _ := ioutil.ReadFile(fmt.Sprintf("monitors/%s", fileInfo.Name()))
-
-			var m map[string]interface{}
-			if err := json.NewDecoder(strings.NewReader(string(bytes))).Decode(&m); err != nil {
-				ErrorLog.Printf("failed to decode the monitor config: %s", err.Error())
-				continue
-			}
-			index := m["_index"].(string)
-			documentID := m["_id"].(string)
-			monitorDoc := m["_source"].(map[string]interface{})
-			docType := monitorDoc["type"].(string)
-			docBytes, err := json.Marshal(&monitorDoc)
+		for _, config := range configs {
+			fileInfos, err := ioutil.ReadDir("config/" + config.Name())
 			if err != nil {
-				log.Fatal("failed to marshall the monitor doc")
-			}
-			log.Printf("pushing monitor config for document id: %s", documentID)
-			log.Printf("pushing monitor config for document type: %s", docType)
-			path := fmt.Sprintf("%s/%s/%s/_create", index, docType, documentID)
-			res, err := handler(path, docBytes)
-
-			if err != nil {
-				ErrorLog.Printf("Error getting response: %s", err.Error())
+				ErrorLog.Printf("failed to read dir: %s", config.Name())
 				continue
 			}
 
-			defer res.Body.Close()
+			// Process all the kibana monitor config and push the update to Kibana
+			for _, fileInfo := range fileInfos {
 
-			if res.StatusCode >= 300 {
-				InfoLog.Printf("[%d] Error indexing document", res.StatusCode)
-			} else {
-				// Deserialize the response into a map.
-				var r map[string]interface{}
-				if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-					ErrorLog.Printf("Error parsing the response body: %s", err)
+				log.Printf("creating kibana %s: %s to kiban cluster", config.Name(), fileInfo.Name())
+				filename := fmt.Sprintf("config/%s/%s", config.Name(), fileInfo.Name())
+				bytes, err := ioutil.ReadFile(filename)
+				if err != nil {
+					ErrorLog.Printf("failed to read the content of the file %s", filename)
+					continue
+				}
+
+				var m map[string]interface{}
+				if err := json.NewDecoder(strings.NewReader(string(bytes))).Decode(&m); err != nil {
+					ErrorLog.Printf("failed to decode the config file: %s", filename)
+					continue
+				}
+				index := m["_index"].(string)
+				documentID := m["_id"].(string)
+				source := m["_source"].(map[string]interface{})
+
+				log.Printf("pushing kibana config for document Id: %s", documentID)
+
+				body, err := requestBody(source, config.Name())
+				if err != nil {
+					ErrorLog.Printf("failed to decode the request body for config: %s", filename)
+					continue
+				}
+				res, err := handler(path(config.Name(), index, documentID), body)
+
+				if err != nil {
+					ErrorLog.Printf("Error getting response: %s", err.Error())
+					continue
+				}
+
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					ErrorLog.Printf("[%d] Error indexing document", res.StatusCode)
 				} else {
-					// Print the response status and indexed document version.
-					InfoLog.Printf("[%d] %s; version=%d; monitor=%s", res.StatusCode, r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
+					// Deserialize the response into a map.
+					var r map[string]interface{}
+					if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+						ErrorLog.Printf("Error parsing the response body: %s", err)
+					} else {
+						// Print the response status and indexed document version.
+						InfoLog.Printf("[%d] %s; version=%d; monitor=%s", res.StatusCode, r["result"], int(r["_version"].(float64)), strings.SplitAfter(fileInfo.Name(), ".")[0])
+					}
 				}
 			}
 		}
-
 	}
+}
 
+func requestBody(content map[string]interface{}, docType string) ([]byte, error) {
+	if docType == "destination" {
+		content = content["destination"].(map[string]interface{})
+	} else if docType == "email_group" {
+		content = content["email_group"].(map[string]interface{})
+	}
+	body, err := json.Marshal(&content)
+	if err != nil {
+		ErrorLog.Println("failed to marshall the monitor doc")
+		return nil, err
+	}
+	return body, nil
+}
+
+func path(docType string, index, documentID string) string {
+	switch docType {
+	case "monitor":
+		return "_opendistro/_alerting/monitors"
+	case "destination":
+		return "_opendistro/_alerting/destinations"
+	case "email_account":
+		return "_opendistro/_alerting/destinations/email_accounts"
+	case "email_group":
+		return "_opendistro/_alerting/destinations/email_groups"
+	default:
+		return fmt.Sprintf("%s/_create/%s", index, documentID)
+	}
 }

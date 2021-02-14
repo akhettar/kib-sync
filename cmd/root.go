@@ -17,13 +17,9 @@ limitations under the License.
 package cmd
 
 import (
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-
-	el "github.com/elastic/go-elasticsearch/v7"
 	"github.com/spf13/cobra"
 )
 
@@ -78,21 +74,7 @@ func init() {
 
 	// add the command
 	rootCmd.AddCommand(syncCmd)
-	rootCmd.AddCommand(pushCmd)
 	rootCmd.AddCommand(createCmd)
-}
-
-func newClient(user, password, url string) *el.Client {
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	config := el.Config{Addresses: []string{url}, Username: user, Password: password, Transport: tr}
-	el, err := el.NewClient(config)
-	if err != nil {
-		ErrorLog.Fatalf("failed to create elastic search client %v", err)
-	}
-	return el
 }
 
 func getValue(flag string) string {

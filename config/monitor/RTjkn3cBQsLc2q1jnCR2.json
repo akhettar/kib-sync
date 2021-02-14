@@ -1,0 +1,97 @@
+{
+	"_id": "RTjkn3cBQsLc2q1jnCR2",
+	"_index": ".opendistro-alerting-config",
+	"_primary_term": 2,
+	"_score": 1,
+	"_seq_no": 87,
+	"_source": {
+		"enabled": true,
+		"enabled_time": 1613290932854,
+		"inputs": [
+			{
+				"search": {
+					"indices": [
+						"kibana_sample_data_logs"
+					],
+					"query": {
+						"aggregations": {},
+						"query": {
+							"bool": {
+								"adjust_pure_negative": true,
+								"boost": 1,
+								"filter": [
+									{
+										"range": {
+											"@timestamp": {
+												"boost": 1,
+												"format": "epoch_millis",
+												"from": "||-1h",
+												"include_lower": true,
+												"include_upper": true,
+												"to": ""
+											}
+										}
+									}
+								]
+							}
+						},
+						"size": 0
+					}
+				}
+			}
+		],
+		"last_update_time": 1613295295595,
+		"name": "test-monitor",
+		"schedule": {
+			"period": {
+				"interval": 1,
+				"unit": "MINUTES"
+			}
+		},
+		"schema_version": 3,
+		"triggers": [
+			{
+				"actions": [
+					{
+						"destination_id": "ld7912sBlQ5JUWWFThoW",
+						"id": "ouOin3cBG-646M6FChx2",
+						"message_template": {
+							"lang": "mustache",
+							"source": "This is my message body."
+						},
+						"name": "test-action",
+						"subject_template": {
+							"lang": "mustache",
+							"source": "TheSubject"
+						},
+						"throttle_enabled": false
+					}
+				],
+				"condition": {
+					"script": {
+						"lang": "painless",
+						"source": "ctx.results[0].hits.total.value \u003e 0"
+					}
+				},
+				"id": "oeOin3cBG-646M6FChx2",
+				"name": "test-trigger",
+				"severity": "1"
+			}
+		],
+		"type": "monitor",
+		"user": {
+			"backend_roles": [
+				"admin"
+			],
+			"custom_attribute_names": [],
+			"name": "admin",
+			"roles": [
+				"all_access",
+				"own_index"
+			],
+			"user_requested_tenant": null
+		}
+	},
+	"_type": "_doc",
+	"_version": 1
+}
