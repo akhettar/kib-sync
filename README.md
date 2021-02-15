@@ -1,7 +1,7 @@
 
 ![go](go.png)
 # odfe-kibana-sync 
-![Master](https://github.com/akhettar/odfe-kibana-sync/workflows/Master/badge.svg)
+![main](https://github.com/akhettar/odfe-kibana-sync/workflows/main/badge.svg)
 
 ## Overview
 This is a command line tool to sync and create the `Kibana object configs` from a given [open distro elk cluster](https://opendistro.github.io/for-elasticsearch-docs/) - see below the help section. This tool assumes that Kibana cluster holds the source of the truth in relation to the configuration file. The sole purpose of this tool is to be run periodically to sync these configuration files with the a given Git repository.
