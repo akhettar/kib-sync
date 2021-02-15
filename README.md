@@ -14,7 +14,7 @@ The following kibana configuration files can be synched and created in a given k
 3. Saved search
 4. Destinations(slack, email etc)
 5. Email accounts
-6. Group email
+6. Email groups.
 
 ```./odfe-kibana-sync -h
 This tool performs the followings:
