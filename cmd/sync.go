@@ -62,17 +62,25 @@ func newQueryHandler() QueryHandler {
 		res, err := c.Do(path, http.MethodGet, body)
 
 		if err != nil {
-			ErrorLog.Fatal(err)
+			ErrorLog.Printf("failed to query the config for the given %s", config)
+			return nil, fmt.Errorf("failed to query the config for the given %s", config)
 		}
 		defer res.Body.Close()
 
-		if res.StatusCode >= 300 {
-			ErrorLog.Fatalf("Got response with status code: %d", res.StatusCode)
+		if res.StatusCode != http.StatusOK {
+			if res.StatusCode == http.StatusNotFound {
+				InfoLog.Printf("%s not found in the kiban cluster", config)
+				return nil, fmt.Errorf("%s config not found", config)
+			} else {
+				ErrorLog.Printf("failed to fecth the config file for %s from the kibana cluster", config)
+				return nil, fmt.Errorf("%s config not found", config)
+			}
 		}
+
 		var r map[string]interface{}
 
 		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-			ErrorLog.Fatalf("Error parsing the response body: %s", err)
+			return nil, fmt.Errorf("failed to decode the config for %s", config)
 		}
 
 		// Print the response status, number of results, and request duration.
@@ -107,9 +115,9 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 			r, err := handler(config, query)
 
 			if err != nil {
-				ErrorLog.Printf("failed to fetch config file for %s", config)
 				continue
 			}
+
 			createDir(fmt.Sprintf("%s/%s", getValue(WorkDir), config))
 
 			// Print the ID and document source for each hit.
