@@ -52,7 +52,7 @@ Use "odfe-kibana-sync [command] --help" for more information about a command.
 ```
 
 ## Watch a demo
-coming soon!
+[![odfe demo](odfe-demo.png)](https://player.vimeo.com/video/514925042?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479)
 
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`
