@@ -27,6 +27,7 @@ func NewClient(url, user, password string) *Client {
 
 func (c *Client) Do(path, method string, body []byte) (*http.Response, error) {
 	url := fmt.Sprintf("%s/%s", c.host, path)
+	fmt.Printf("url: %s", url)
 	req, err := http.NewRequest(method, url, strings.NewReader(string(body)))
 	req.Header.Add("Content-Type", "application/json")
 	if err != nil {

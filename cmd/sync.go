@@ -36,7 +36,7 @@ const (
 	searchQueryPath string = "_search"
 )
 
-var configs []string = []string{"monitor", "email_account", "email_group", "dashboard", "search", "destination"}
+var configs []string = []string{"monitor", "email_account", "email_group", "dashboard", "search", "destination", "visualization", "index-pattern"}
 
 var syncCmd = &cobra.Command{
 	Use:   "sync",
@@ -51,15 +51,9 @@ type QueryHandler func(path string, body []byte) (map[string]interface{}, error)
 func newQueryHandler() QueryHandler {
 	return func(config string, body []byte) (map[string]interface{}, error) {
 		c := es.NewClient(getValue(URL), getValue(UserName), getValue(Password))
-		var path string
-		if config == "search" || config == "dashboard" {
-			path = searchQueryPath
-		} else {
-			path = alertQueryPath
-		}
 
 		// query all monitors
-		res, err := c.Do(path, http.MethodGet, body)
+		res, err := c.Do(getPath(config), http.MethodGet, body)
 
 		if err != nil {
 			ErrorLog.Printf("failed to query the config for the given %s", config)
@@ -71,10 +65,10 @@ func newQueryHandler() QueryHandler {
 			if res.StatusCode == http.StatusNotFound {
 				InfoLog.Printf("%s not found in the kiban cluster", config)
 				return nil, fmt.Errorf("%s config not found", config)
-			} else {
-				ErrorLog.Printf("failed to fecth the config file for %s from the kibana cluster", config)
-				return nil, fmt.Errorf("%s config not found", config)
 			}
+			ErrorLog.Printf("failed to fecth the config file for %s from the kibana cluster", config)
+			return nil, fmt.Errorf("%s config not found", config)
+
 		}
 
 		var r map[string]interface{}
@@ -105,7 +99,7 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 		for _, config := range configs {
 
 			InfoLog.Printf("querying kiban config %s", config)
-			query, err := json.Marshal(model.QueryRequest{Size: 10000, Query: model.Query{model.Bool{model.Must{model.Exists{config}}}}})
+			query, err := json.Marshal(model.QueryRequest{Size: 1000, Query: model.Query{model.Bool{model.Must{model.Exists{config}}}}})
 
 			if err != nil {
 				ErrorLog.Fatal("failed to marshal the query request")
@@ -144,7 +138,9 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 			}
 
 			InfoLog.Printf("all of the %d kiban monitor configs successfully synched", counter)
-			// remove the redundant configs
+
+			// removing the config files that have been deleted
+			InfoLog.Printf("working dir: %s", getValue(WorkDir))
 			fileInfos, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", getValue(WorkDir), config))
 			if err != nil {
 				log.Fatal(err)
@@ -160,6 +156,15 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 			}
 		}
 
+	}
+}
+
+func getPath(config string) string {
+	switch config {
+	case "search", "dashboard", "visualization", "index-pattern":
+		return searchQueryPath
+	default:
+		return alertQueryPath
 	}
 }
 
