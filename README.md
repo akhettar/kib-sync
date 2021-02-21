@@ -15,6 +15,9 @@ Ideally, this tool should be run in a CI pipeline for a given project that hosts
 * This cli is for synching the Kibana configuration files with a given Git repository.
 * Deleted configs in Kibana console will be automatically deleted with the `sync folder`.
 
+## Watch a demo
+[![odfe demo](odfe-demo.png)](https://player.vimeo.com/video/514925042?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479)
+
 ## Supported Kibana configurations
 The following kibana configuration files can be synched and created in a given kiban instance:
 1. Monitors
@@ -50,9 +53,6 @@ Flags:
 
 Use "odfe-kibana-sync [command] --help" for more information about a command.
 ```
-
-## Watch a demo
-[![odfe demo](odfe-demo.png)](https://player.vimeo.com/video/514925042?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479)
 
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`
