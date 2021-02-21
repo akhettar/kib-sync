@@ -51,6 +51,9 @@ Flags:
 Use "odfe-kibana-sync [command] --help" for more information about a command.
 ```
 
+## Watch a demo
+![watch a demo](https://vimeo.com/514925042/82d2b7b9a8)
+
 
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`

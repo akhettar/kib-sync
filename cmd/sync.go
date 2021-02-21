@@ -137,7 +137,9 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 				counter++
 			}
 
-			InfoLog.Printf("all of the %d kiban monitor configs successfully synched", counter)
+			InfoLog.Println("###############################################################")
+			InfoLog.Printf("#  All of the %d kiban monitor configs successfully synched  #", counter)
+			InfoLog.Println("###############################################################")
 
 			// removing the config files that have been deleted
 			InfoLog.Printf("working dir: %s", getValue(WorkDir))
@@ -151,11 +153,16 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 				id := strings.Split(fileInfo.Name(), ".")[0]
 				if !find(ids, id) {
 					WarnLog.Printf("removing kiban config with id: %s", fileInfo.Name())
-					os.Remove(fmt.Sprintf("%s/%s", getValue(WorkDir), fileInfo.Name()))
+					err := os.Remove(fmt.Sprintf("%s/%s/%s", getValue(WorkDir), config, fileInfo.Name()))
+					if err != nil {
+						ErrorLog.Println(err)
+					}
 				}
 			}
 		}
-
+		InfoLog.Println("###############################################################")
+		InfoLog.Println("#           Sync operation has been comleted                  #")
+		InfoLog.Println("###############################################################")
 	}
 }
 
