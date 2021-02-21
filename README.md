@@ -54,19 +54,55 @@ The sync command fetches all the monitors config defined in the given kibana clu
 The above command should produce a `config` folder containing the following structure (of course depending on the kiban objects configured in the cluster)
 ```
 ├── config
-│   ├── dashboard
-│   │   ├── dashboard:4b85e090-f4be-11ea-8342-bf90f7b9d26e.json
-│   │   ├── dashboard:722b74f0-b882-11e8-a6d9-e546fe2bba5f.json
-│   │   └── dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b.json
-│   ├── destination
-│   │   └── XILEfXcBZWXOV7PGGr3r.json
-│   ├── email_account
-│   ├── email_group
-│   ├── monitor
-│   │   └── 13otoHcBbX-aeATowSlk.json
-│   └── search
-│       ├── search:3ba638e0-b894-11e8-a6d9-e546fe2bba5f.json
-│       └── search:571aaf70-4c88-11e8-b3d7-01146121b73d.json
+│   ├── dashboard
+│   │   ├── dashboard:722b74f0-b882-11e8-a6d9-e546fe2bba5f.json
+│   │   └── dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d.json
+│   ├── destination
+│   │   ├── 2nvxw3cBIRIg_9xDkrXp.json
+│   │   ├── jnv6w3cBIRIg_9xDLPso.json
+│   │   └── qXusw3cBIRIg_9xDR7Ru.json
+│   ├── email_account
+│   │   ├── iHvgw3cBIRIg_9xDSrXh.json
+│   │   └── j3v6w3cBIRIg_9xDLftc.json
+│   ├── email_group
+│   │   └── jHvgw3cBIRIg_9xDmbV5.json
+│   ├── index-pattern
+│   │   ├── index-pattern:d3d7af60-4c81-11e8-b3d7-01146121b73d.json
+│   │   └── index-pattern:ff959d40-b880-11e8-a6d9-e546fe2bba5f.json
+│   ├── monitor
+│   │   └── qHurw3cBIRIg_9xD6LRW.json
+│   ├── search
+│   │   ├── search:3ba638e0-b894-11e8-a6d9-e546fe2bba5f.json
+│   │   └── search:571aaf70-4c88-11e8-b3d7-01146121b73d.json
+│   └── visualization
+│       ├── visualization:01c413e0-5395-11e8-99bf-1ba7b1bdaa61.json
+│       ├── visualization:08884800-52fe-11e8-a160-89cc2ad9e8e2.json
+│       ├── visualization:09ffee60-b88c-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:10f1a240-b891-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:129be430-4c93-11e8-b3d7-01146121b73d.json
+│       ├── visualization:1c389590-b88d-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:293b5a30-4c8f-11e8-b3d7-01146121b73d.json
+│       ├── visualization:2edf78b0-5395-11e8-99bf-1ba7b1bdaa61.json
+│       ├── visualization:334084f0-52fd-11e8-a160-89cc2ad9e8e2.json
+│       ├── visualization:37cc8650-b882-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:45e07720-b890-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:4b3ec120-b892-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:707665a0-4c8c-11e8-b3d7-01146121b73d.json
+│       ├── visualization:76e3c090-4c8c-11e8-b3d7-01146121b73d.json
+│       ├── visualization:8f4d0c00-4c86-11e8-b3d7-01146121b73d.json
+│       ├── visualization:9886b410-4c8b-11e8-b3d7-01146121b73d.json
+│       ├── visualization:9c6f83f0-bb4d-11e8-9c84-77068524bcab.json
+│       ├── visualization:9ca7aa90-b892-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:aeb212e0-4c84-11e8-b3d7-01146121b73d.json
+│       ├── visualization:b72dd430-bb4d-11e8-9c84-77068524bcab.json
+│       ├── visualization:b80e6540-b891-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:bcb63b50-4c89-11e8-b3d7-01146121b73d.json
+│       ├── visualization:c8fc3d30-4c87-11e8-b3d7-01146121b73d.json
+│       ├── visualization:e6944e50-52fe-11e8-a160-89cc2ad9e8e2.json
+│       ├── visualization:ed78a660-53a0-11e8-acbd-0be0ad9d822b.json
+│       ├── visualization:ed8436b0-b88b-11e8-a6d9-e546fe2bba5f.json
+│       ├── visualization:f8283bf0-52fd-11e8-a160-89cc2ad9e8e2.json
+│       └── visualization:f8290060-4c88-11e8-b3d7-01146121b73d.json
 ```
 
 ## Invoking the create command
