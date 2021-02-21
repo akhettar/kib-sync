@@ -4,10 +4,18 @@
 ![main](https://github.com/akhettar/odfe-kibana-sync/workflows/main/badge.svg)
 
 ## Overview
-This is a command line tool to sync and create the `Kibana object configs` from a given [open distro elk cluster](https://opendistro.github.io/for-elasticsearch-docs/) - see below the help section. This tool assumes that Kibana cluster holds the source of the truth in relation to the configuration file. The sole purpose of this tool is to be run periodically to sync these configuration files with the a given Git repository.
+This is a command line tool to sync and create the `Kibana object configs` from a given [open distro elk cluster](https://opendistro.github.io/for-elasticsearch-docs/) - see below the help section. This tool assumes that Kibana cluster holds the source of the truth in relation to the configuration files. The sole purpose of this tool is to be run periodically in a given CI pipeline to sync these configuration files with the a given Git repository.
 
-Idelly, this tool should be run in a CI pipeline for a given project that hosts Kibana configuration files - see example Github project.
+Ideally, this tool should be run in a CI pipeline for a given project that hosts Kibana configuration files - see example Github project.
 
+`Read carefully before usage please`:
+
+* This cli is not a full blown command line interface for the open distro elasticsearch. There is one, see [doc](https://opendistro.github.io/for-elasticsearch-docs/docs/cli/).
+* This cli assumes that the all the updates, create and delete are done through the Kiban console.
+* This cli is for synching the Kibana configuration files with a given Git repository.
+* Deleted configs in Kibana console will be automatically deleted with the `sync folder`.
+
+## Supported Kibana configurations
 The following kibana configuration files can be synched and created in a given kiban instance:
 1. Monitors
 2. Dashboards
@@ -43,6 +51,8 @@ Flags:
 Use "odfe-kibana-sync [command] --help" for more information about a command.
 ```
 
+## Watch a demo
+coming soon!
 
 ## Invoking the sync command
 The sync command fetches all the monitors config defined in the given kibana cluster and store them locally in the `./config folder`
@@ -112,7 +122,7 @@ The create command read all the kibana configs present in the local `./config fo
 ./odfe-kibana-sync push --username admin --password admin --url https://localhost:9200
 ```
 
-## Experementing with the tool
+## Experimenting with the tool
 
 You can run the opendistro ELK locally by running the following command
 

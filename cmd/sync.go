@@ -95,6 +95,7 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 		// crete parent config directory
 		createDir(getValue(WorkDir))
 
+		var deletedFiles []string
 		// Query all the config of the following kiban objects
 		for _, config := range configs {
 
@@ -117,6 +118,7 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 			// Print the ID and document source for each hit.
 			counter := 0
 			var ids []string
+
 			for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
 				id := hit.(map[string]interface{})["_id"]
 				ids = append(ids, id.(string))
@@ -137,7 +139,9 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 				counter++
 			}
 
-			InfoLog.Printf("all of the %d kiban monitor configs successfully synched", counter)
+			InfoLog.Println("###############################################################")
+			InfoLog.Printf("#  All of the %d kiban monitor configs successfully synched  #", counter)
+			InfoLog.Println("###############################################################")
 
 			// removing the config files that have been deleted
 			InfoLog.Printf("working dir: %s", getValue(WorkDir))
@@ -151,8 +155,24 @@ func SyncConfig(handler QueryHandler, configs []string) func(cmd *cobra.Command,
 				id := strings.Split(fileInfo.Name(), ".")[0]
 				if !find(ids, id) {
 					WarnLog.Printf("removing kiban config with id: %s", fileInfo.Name())
-					os.Remove(fmt.Sprintf("%s/%s", getValue(WorkDir), fileInfo.Name()))
+					filename := fmt.Sprintf("%s/%s/%s", getValue(WorkDir), config, fileInfo.Name())
+					err := os.Remove(filename)
+					if err != nil {
+						ErrorLog.Println(err)
+					}
+					deletedFiles = append(deletedFiles, filename)
 				}
+			}
+		}
+		InfoLog.Println("###############################################################")
+		InfoLog.Println("#           Sync operation has been comleted                  #")
+		InfoLog.Println("###############################################################")
+
+		if len(deletedFiles) > 0 {
+			WarnLog.Println("List of deleted config files are: ")
+			WarnLog.Println("================================= ")
+			for _, name := range deletedFiles {
+				InfoLog.Printf("=== %s ===", name)
 			}
 		}
 
